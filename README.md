@@ -1,4 +1,9 @@
 # WebSentinel
+<p align="center">
+  <img src="ss.png" alt="WebSentinel" width="100%">
+</p>
+
+# WebSentinel
 
 > **Automated Web Security Assessment Platform powered by Dockerized OWASP ZAP**
 
