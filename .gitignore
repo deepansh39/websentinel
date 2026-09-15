@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environment
+.venv/
+venv/
+env/
+
+# Flask / local instance
+instance/
+
+# Environment / secrets
+.env
+.env.*
+
+# Local databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Generated ZAP reports
+reports/*
+!reports/.gitkeep
+
+# Screenshots generated locally
+screenshots/
+
+# macOS
+.DS_Store
+
+# Editors
+.vscode/
+.idea/
+
+# Logs / temporary files
+*.log
+*.tmp
+*.swp

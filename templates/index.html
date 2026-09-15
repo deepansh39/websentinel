@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WebSentinel | Automated Web Security Scanning</title>
+<style>
+  @import url('https://cdnjs.cloudflare.com/ajax/libs/ibm-plex/6.4.1/css/ibm-plex-sans.min.css');
+
+  :root{
+    --bg: #05070d;
+    --bg-2: #090c16;
+    --panel: #0d111c;
+    --line: rgba(148,163,196,0.14);
+    --line-bright: rgba(148,163,196,0.28);
+    --cyan: #45c9f0;
+    --cyan-soft: rgba(69,201,240,0.14);
+    --violet: #8b7bff;
+    --amber: #ffb454;
+    --red: #ff6a6a;
+    --text: #eef2f8;
+    --text-dim: #8791a3;
+    --text-mute: #5b6478;
+    --mono: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    --sans: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+
+  *{ margin:0; padding:0; box-sizing:border-box; }
+
+  html{ scroll-behavior:smooth; }
+
+  body{
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+    perspective: 1400px;
+  }
+
+  ::selection{ background: var(--cyan); color:#00131a; }
+
+  a{ color:inherit; }
+
+  /* ---------- background field ---------- */
+  #field{
+    position:fixed; inset:0; z-index:0; pointer-events:none;
+    background:
+      radial-gradient(ellipse 900px 600px at 18% 8%, rgba(69,201,240,0.10), transparent 60%),
+      radial-gradient(ellipse 700px 700px at 88% 30%, rgba(139,123,255,0.09), transparent 60%),
+      radial-gradient(ellipse 900px 500px at 50% 100%, rgba(69,201,240,0.06), transparent 60%);
+  }
+  #grid{
+    position:fixed; inset:-10% -10%; z-index:0; pointer-events:none;
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size: 64px 64px;
+    -webkit-mask-image: radial-gradient(ellipse 70% 55% at 50% 20%, black 10%, transparent 75%);
+            mask-image: radial-gradient(ellipse 70% 55% at 50% 20%, black 10%, transparent 75%);
+    opacity:0.5;
+    transform: translateZ(0);
+    will-change: transform;
+  }
+
+  section{ position:relative; z-index:1; }
+
+  /* ---------- nav ---------- */
+  nav{
+    position: sticky; top:0; z-index:50;
+    display:flex; align-items:center; justify-content:space-between;
+    padding: 20px clamp(20px, 6vw, 72px);
+    background: rgba(5,7,13,0.72);
+    backdrop-filter: blur(14px) saturate(140%);
+    border-bottom: 1px solid var(--line);
+  }
+  .logo{ display:flex; align-items:center; gap:10px; font-size:18px; font-weight:600; letter-spacing:-0.01em; }
+  .logo-mark{
+    width:26px; height:26px; position:relative; flex-shrink:0;
+  }
+  .logo-mark svg{ width:100%; height:100%; }
+  .logo span{ color: var(--cyan); }
+  .nav-links{ display:flex; gap:36px; font-size:14.5px; color: var(--text-dim); }
+  .nav-links a{ text-decoration:none; transition: color .2s ease; }
+  .nav-links a:hover{ color: var(--text); }
+  .nav-right{ display:flex; align-items:center; gap:18px; }
+  .login-btn{
+    text-decoration:none; color:var(--text); border:1px solid var(--line-bright);
+    padding:9px 18px; border-radius:8px; font-size:14px; transition: all .25s ease;
+  }
+  .login-btn:hover{ border-color: var(--cyan); background: var(--cyan-soft); }
+  @media (max-width: 860px){ .nav-links{ display:none; } }
+
+  /* ---------- hero ---------- */
+  .hero{
+    display:grid; grid-template-columns: 1.05fr 0.95fr; align-items:center;
+    gap: 40px;
+    padding: clamp(50px, 9vh, 110px) clamp(20px, 6vw, 72px) 60px;
+    min-height: 88vh;
+  }
+  .badge{
+    display:inline-flex; align-items:center; gap:8px;
+    padding:7px 14px; border:1px solid rgba(69,201,240,0.3); border-radius:999px;
+    color: var(--cyan); background: var(--cyan-soft); font-size:12.5px; font-family: var(--mono);
+    margin-bottom:26px; opacity:0; animation: rise .7s .1s ease forwards;
+  }
+  .badge .dot{ width:6px; height:6px; border-radius:50%; background: var(--cyan); box-shadow:0 0 8px var(--cyan); animation: pulse 1.8s infinite; }
+
+  .hero h1{
+    font-size: clamp(40px, 4.6vw, 66px);
+    line-height: 1.04;
+    letter-spacing: -0.02em;
+    font-weight: 600;
+    max-width: 640px;
+    opacity:0; animation: rise .8s .22s ease forwards;
+  }
+  .hero h1 em{
+    font-style: normal;
+    background: linear-gradient(100deg, var(--cyan), var(--violet) 85%);
+    -webkit-background-clip: text; background-clip:text; color:transparent;
+  }
+  .hero p.lede{
+    margin-top:22px; max-width:520px; color: var(--text-dim); font-size:17px; line-height:1.65;
+    opacity:0; animation: rise .8s .34s ease forwards;
+  }
+  .hero-ctas{ display:flex; align-items:center; gap:22px; margin-top:34px; opacity:0; animation: rise .8s .46s ease forwards; }
+  .cta{
+    text-decoration:none; font-weight:600; font-size:15px;
+    color:#00131a; background: var(--cyan); padding:14px 24px; border-radius:9px;
+    box-shadow: 0 0 0 0 rgba(69,201,240,0.5);
+    transition: transform .3s ease, box-shadow .3s ease;
+    transform-style: preserve-3d;
+  }
+  .cta:hover{ transform: translateY(-3px) translateZ(10px); box-shadow: 0 16px 40px rgba(69,201,240,0.28); }
+  .cta-ghost{ text-decoration:none; color: var(--text-dim); font-size:14.5px; display:flex; align-items:center; gap:8px; transition:color .2s; }
+  .cta-ghost:hover{ color: var(--text); }
+  .cta-ghost svg{ width:14px; height:14px; }
+
+  .hero-stats{
+    display:flex; gap:40px; margin-top:56px; padding-top:28px; border-top:1px solid var(--line);
+    max-width:560px; opacity:0; animation: rise .8s .58s ease forwards;
+  }
+  .stat b{ display:block; font-size:26px; font-family: var(--mono); font-weight:500; }
+  .stat span{ font-size:12.5px; color: var(--text-mute); }
+
+  @keyframes rise{ from{ opacity:0; transform: translateY(18px);} to{ opacity:1; transform:translateY(0);} }
+  @keyframes pulse{ 0%,100%{ opacity:1;} 50%{ opacity:.35;} }
+
+  /* ---------- 3D scan orb ---------- */
+  .orb-stage{
+    position:relative; height: 480px;
+    display:flex; align-items:center; justify-content:center;
+    transform-style: preserve-3d;
+    opacity:0; animation: rise 1s .3s ease forwards;
+  }
+  .orb-wrap{
+    position:relative; width:380px; height:380px; transform-style: preserve-3d;
+    animation: spin 26s linear infinite;
+  }
+  @keyframes spin{ from{ transform: rotateX(62deg) rotateZ(0deg);} to{ transform: rotateX(62deg) rotateZ(360deg);} }
+  .ring{
+    position:absolute; inset:0; border-radius:50%;
+    border:1px solid rgba(69,201,240,0.35);
+    transform-style:preserve-3d;
+  }
+  .ring:nth-child(1){ transform: rotateX(0deg); }
+  .ring:nth-child(2){ transform: rotateY(60deg); border-color: rgba(139,123,255,0.3); }
+  .ring:nth-child(3){ transform: rotateY(120deg); border-color: rgba(69,201,240,0.2); }
+  .ring:nth-child(4){ inset:60px; border-color: rgba(255,255,255,0.08); transform: rotateX(20deg); }
+
+  .orb-core{
+    position:absolute; inset:130px; border-radius:50%;
+    background: radial-gradient(circle at 35% 30%, rgba(69,201,240,0.5), rgba(9,12,22,0.9) 70%);
+    box-shadow: 0 0 90px rgba(69,201,240,0.35), inset 0 0 40px rgba(0,0,0,0.6);
+    transform: translateZ(40px);
+  }
+  .sweep{
+    position:absolute; inset:0; border-radius:50%;
+    background: conic-gradient(from 0deg, transparent 0deg, rgba(69,201,240,0.35) 18deg, transparent 40deg);
+    animation: sweep 3.2s linear infinite;
+    transform: translateZ(2px);
+  }
+  @keyframes sweep{ to{ transform: translateZ(2px) rotate(360deg); } }
+
+  .node{
+    position:absolute; width:10px; height:10px; border-radius:50%;
+    background: var(--amber); box-shadow: 0 0 10px var(--amber);
+    transform-style:preserve-3d;
+  }
+  .node.crit{ background:var(--red); box-shadow:0 0 12px var(--red); }
+  .node.n1{ top:8%; left:48%; transform: translateZ(60px); }
+  .node.n2{ top:55%; left:12%; transform: translateZ(30px); }
+  .node.n3{ top:70%; left:78%; transform: translateZ(80px); }
+  .node.n4{ top:30%; left:82%; transform: translateZ(10px); }
+
+  .float-chip{
+    position:absolute; padding:9px 13px; border-radius:9px; font-family: var(--mono); font-size:12px;
+    background: rgba(13,17,28,0.9); border:1px solid var(--line-bright); backdrop-filter: blur(6px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    animation: float 5s ease-in-out infinite;
+  }
+  .chip-1{ top:6%; right:2%; animation-delay:.2s; color: var(--red); }
+  .chip-2{ bottom:10%; left:0%; animation-delay:1.4s; color: var(--amber); }
+  .chip-3{ top:44%; right:-6%; animation-delay: 2.6s; color: var(--cyan); }
+  @keyframes float{ 0%,100%{ transform: translateY(0);} 50%{ transform: translateY(-14px);} }
+
+  /* ---------- section shell ---------- */
+  .shell{ padding: 100px clamp(20px, 6vw, 72px); }
+  .eyebrow-row{
+    display:flex; align-items:baseline; justify-content:space-between; gap:24px; margin-bottom:52px; flex-wrap:wrap;
+  }
+  .section-title{ font-size: clamp(28px, 3vw, 40px); font-weight:600; letter-spacing:-0.015em; max-width:640px; }
+  .section-sub{ color: var(--text-dim); font-size:15.5px; max-width:380px; line-height:1.6; }
+
+  .reveal{ opacity:0; transform: translateY(30px) rotateX(6deg); transform-origin: top center; transition: opacity .8s ease, transform .8s cubic-bezier(.2,.8,.2,1); }
+  .reveal.in{ opacity:1; transform: translateY(0) rotateX(0deg); }
+
+  /* ---------- terminal panel ---------- */
+  .terminal-row{ display:grid; grid-template-columns: 0.85fr 1.15fr; gap:56px; align-items:center; }
+  .terminal{
+    background: linear-gradient(180deg, #0f1420, #0a0d16);
+    border:1px solid var(--line-bright); border-radius:14px; overflow:hidden;
+    box-shadow: 0 40px 90px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.02);
+    transform: perspective(1200px) rotateY(-8deg) rotateX(3deg);
+    transition: transform .4s ease;
+  }
+  .terminal:hover{ transform: perspective(1200px) rotateY(-3deg) rotateX(1deg); }
+  .term-head{ display:flex; align-items:center; gap:8px; padding:13px 16px; border-bottom:1px solid var(--line); background: rgba(255,255,255,0.02); }
+  .term-dot{ width:10px; height:10px; border-radius:50%; }
+  .term-head span{ margin-left:10px; font-family: var(--mono); font-size:12px; color: var(--text-mute); }
+  .term-body{ padding:22px 20px; font-family: var(--mono); font-size:13.2px; line-height:1.9; min-height:280px; }
+  .term-body .muted{ color: var(--text-mute); }
+  .term-body .ok{ color:#6ee7a0; }
+  .term-body .warn{ color: var(--amber); }
+  .term-body .crit{ color: var(--red); }
+  .term-body .cyan{ color: var(--cyan); }
+  .caret{ display:inline-block; width:8px; height:15px; background: var(--cyan); vertical-align:middle; animation: pulse 1s infinite; }
+
+  .terminal-copy h2{ font-size: clamp(26px,3vw,36px); font-weight:600; letter-spacing:-0.015em; margin-bottom:18px; }
+  .terminal-copy p{ color: var(--text-dim); line-height:1.7; font-size:15.5px; max-width:440px; margin-bottom:26px; }
+  .kv-list{ display:flex; flex-direction:column; gap:14px; }
+  .kv{ display:flex; gap:14px; align-items:flex-start; font-size:14.5px; }
+  .kv .mark{ color: var(--cyan); font-family: var(--mono); flex-shrink:0; }
+
+  /* ---------- process ---------- */
+  .steps{ display:grid; grid-template-columns: repeat(3,1fr); gap:1px; background: var(--line); border:1px solid var(--line); border-radius:16px; overflow:hidden; }
+  .step{ background: var(--bg); padding:38px 30px; position:relative; }
+  .step .num{ font-family: var(--mono); color: var(--cyan); font-size:13px; margin-bottom:22px; display:block; }
+  .step h3{ font-size:19px; margin-bottom:10px; font-weight:600; }
+  .step p{ color: var(--text-dim); font-size:14.5px; line-height:1.6; }
+  @media (max-width: 860px){ .steps{ grid-template-columns:1fr; } .terminal-row{ grid-template-columns:1fr; } }
+
+  /* ---------- findings / tilt cards ---------- */
+  .findings-grid{ display:grid; grid-template-columns: 1.3fr 1fr 1fr; grid-template-rows: auto auto; gap:18px; }
+  .fcard{
+    border:1px solid var(--line-bright); border-radius:16px; padding:28px;
+    background: linear-gradient(160deg, rgba(255,255,255,0.03), rgba(255,255,255,0));
+    transform-style: preserve-3d; will-change: transform;
+    transition: border-color .3s ease, box-shadow .3s ease;
+    position:relative;
+  }
+  .fcard:hover{ border-color: rgba(69,201,240,0.4); box-shadow: 0 30px 60px rgba(0,0,0,0.4); }
+  .fcard.big{ grid-column: span 2; grid-row: span 2; }
+  .sev-bar{ display:flex; align-items:flex-end; gap:10px; height:150px; margin-top:24px; }
+  .sev-bar .bar{ flex:1; border-radius:6px 6px 0 0; position:relative; }
+  .bar-crit{ background: linear-gradient(180deg, #ff8a8a, #ff6a6a); height:92%; }
+  .bar-high{ background: linear-gradient(180deg, #ffcf8a, var(--amber)); height:68%; }
+  .bar-med{ background: linear-gradient(180deg, #a8e0ff, var(--cyan)); height:44%; }
+  .bar-low{ background: linear-gradient(180deg, #b7b0ff, var(--violet)); height:22%; }
+  .sev-labels{ display:flex; gap:10px; margin-top:10px; }
+  .sev-labels span{ flex:1; text-align:center; font-size:11.5px; color: var(--text-mute); font-family: var(--mono); }
+  .fcard h4{ font-size:16px; margin-bottom:8px; font-weight:600; }
+  .fcard p{ color: var(--text-dim); font-size:13.8px; line-height:1.55; }
+  .pill{ display:inline-block; font-family: var(--mono); font-size:11px; padding:3px 9px; border-radius:6px; margin-bottom:14px; }
+  .pill.red{ background: rgba(255,106,106,0.14); color: var(--red); }
+  .pill.amber{ background: rgba(255,180,84,0.14); color: var(--amber); }
+  .pill.cyan{ background: rgba(69,201,240,0.14); color: var(--cyan); }
+  @media (max-width: 900px){ .findings-grid{ grid-template-columns: 1fr 1fr; } .fcard.big{ grid-column: span 2; } }
+  @media (max-width: 620px){ .findings-grid{ grid-template-columns: 1fr; } .fcard.big{ grid-column: span 1; } }
+
+  /* ---------- cta band ---------- */
+  .cta-band{
+    margin: 40px clamp(20px,6vw,72px) 0; padding: 70px clamp(24px,5vw,80px);
+    border-radius:24px; border:1px solid var(--line-bright);
+    background: radial-gradient(ellipse 700px 300px at 20% 0%, rgba(69,201,240,0.14), transparent 60%),
+                radial-gradient(ellipse 500px 300px at 90% 100%, rgba(139,123,255,0.12), transparent 60%),
+                var(--panel);
+    display:flex; align-items:center; justify-content:space-between; gap:30px; flex-wrap:wrap;
+    position:relative; overflow:hidden;
+  }
+  .cta-band h2{ font-size: clamp(26px,3vw,36px); font-weight:600; letter-spacing:-0.015em; max-width:480px; }
+  .cta-band p{ color:var(--text-dim); margin-top:10px; font-size:15px; }
+
+  footer{
+    padding: 40px clamp(20px,6vw,72px) 50px; display:flex; justify-content:space-between; align-items:center;
+    border-top:1px solid var(--line); margin-top:60px; color: var(--text-mute); font-size:13px; flex-wrap:wrap; gap:16px;
+  }
+  footer .foot-links{ display:flex; gap:26px; }
+  footer a{ text-decoration:none; color: var(--text-mute); transition:color .2s; }
+  footer a:hover{ color: var(--text); }
+
+  /* ---------- extruded 3D headline ---------- */
+  .hero h1{
+    text-shadow:
+      0 1px 0 rgba(69,201,240,0.5),
+      0 2px 0 rgba(69,201,240,0.42),
+      0 3px 0 rgba(69,201,240,0.34),
+      0 4px 0 rgba(69,201,240,0.26),
+      0 5px 0 rgba(69,201,240,0.18),
+      0 6px 0 rgba(69,201,240,0.1),
+      0 18px 34px rgba(0,0,0,0.55);
+    transform-style: preserve-3d;
+    will-change: transform;
+    transition: transform .15s ease-out;
+  }
+
+  /* ---------- floating parallax particles ---------- */
+  .particle-field{ position:absolute; inset:-60px; pointer-events:none; transform-style:preserve-3d; z-index:0; }
+  .particle{
+    position:absolute; border-radius:50%; pointer-events:none;
+    box-shadow: 0 0 14px currentColor;
+  }
+
+  /* ---------- ambient wireframe cube ---------- */
+  .cube-stage{
+    position:absolute; top:8%; right:4%; width:140px; height:140px;
+    perspective: 700px; opacity:0.55; pointer-events:none; z-index:0;
+  }
+  .cube{
+    width:100%; height:100%; position:relative; transform-style:preserve-3d;
+    animation: cube-spin 16s linear infinite;
+  }
+  .cube .face{
+    position:absolute; width:140px; height:140px;
+    border:1px solid rgba(139,123,255,0.55);
+    background: linear-gradient(135deg, rgba(139,123,255,0.06), rgba(69,201,240,0.03));
+  }
+  .cube .f1{ transform: translateZ(70px); }
+  .cube .f2{ transform: rotateY(180deg) translateZ(70px); }
+  .cube .f3{ transform: rotateY(90deg) translateZ(70px); }
+  .cube .f4{ transform: rotateY(-90deg) translateZ(70px); }
+  .cube .f5{ transform: rotateX(90deg) translateZ(70px); }
+  .cube .f6{ transform: rotateX(-90deg) translateZ(70px); }
+  @keyframes cube-spin{
+    from{ transform: rotateX(-20deg) rotateY(0deg); }
+    to{ transform: rotateX(-20deg) rotateY(360deg); }
+  }
+  @media (max-width: 860px){ .cube-stage{ display:none; } }
+
+  /* ---------- flip step cards ---------- */
+  .steps{ perspective: 1400px; background:none; border:none; gap:18px; }
+  .step{
+    background:none; padding:0; border:none;
+    height: 240px;
+  }
+  .flip-inner{
+    position:relative; width:100%; height:100%; transform-style: preserve-3d;
+    transition: transform .7s cubic-bezier(.2,.8,.2,1);
+    cursor:pointer;
+  }
+  .step:hover .flip-inner{ transform: rotateY(180deg); }
+  .flip-face{
+    position:absolute; inset:0; backface-visibility:hidden; -webkit-backface-visibility:hidden;
+    border:1px solid var(--line); border-radius:16px; padding:32px 28px;
+    background: var(--bg);
+    display:flex; flex-direction:column; justify-content:center;
+  }
+  .flip-front{ }
+  .flip-front .num{ font-family: var(--mono); color: var(--cyan); font-size:13px; margin-bottom:22px; display:block; }
+  .flip-front h3{ font-size:19px; margin-bottom:8px; font-weight:600; }
+  .flip-front .hint{ color: var(--text-mute); font-size:12.5px; font-family:var(--mono); margin-top:20px; }
+  .flip-back{
+    transform: rotateY(180deg);
+    background: linear-gradient(160deg, rgba(69,201,240,0.1), rgba(139,123,255,0.06));
+    border-color: rgba(69,201,240,0.35);
+  }
+  .flip-back p{ color: var(--text); font-size:14.5px; line-height:1.65; }
+
+  /* ---------- fanned 3D deck for feature cards ---------- */
+  .findings-grid{ perspective: 1800px; }
+  .fcard{ transform-origin: bottom center; }
+  .fcard:nth-child(2){ transform: rotateZ(-1.6deg) rotateY(6deg) translateZ(-10px); }
+  .fcard:nth-child(3){ transform: rotateZ(1.2deg) rotateY(-4deg) translateZ(-6px); }
+  .fcard:nth-child(4){ transform: rotateZ(-1deg) rotateY(4deg) translateZ(-14px); }
+  .fcard:nth-child(5){ transform: rotateZ(1.6deg) rotateY(-6deg) translateZ(-8px); }
+
+  /* ---------- 3D press CTA button ---------- */
+  .cta3d{ position:relative; display:inline-block; transform-style:preserve-3d; }
+  .cta3d .cta{
+    position:relative; display:inline-block; transform: translateZ(10px);
+  }
+  .cta3d::after{
+    content:""; position:absolute; inset:0; border-radius:9px;
+    background: #1a7fa3; transform: translateZ(0px);
+    z-index:-1;
+  }
+  .cta3d:active .cta{ transform: translateZ(2px); }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important; }
+  }
+</style>
+</head>
+<body>
+
+<div id="field"></div>
+<div id="grid"></div>
+
+<nav>
+  <div class="logo">
+    <span class="logo-mark">
+      <svg viewBox="0 0 26 26" fill="none">
+        <path d="M13 2 L23 6.5 V13.5 C23 19 18.5 22.7 13 24.5 C7.5 22.7 3 19 3 13.5 V6.5 L13 2Z" stroke="#45c9f0" stroke-width="1.6"/>
+        <path d="M8.5 13 L11.5 16 L17.5 9.5" stroke="#45c9f0" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </span>
+    Web<span>Sentinel</span>
+  </div>
+  <div class="nav-links">
+    <a href="#platform">Platform</a>
+    <a href="#process">How it works</a>
+    <a href="#findings">Findings</a>
+    <a href="#docs">Docs</a>
+  </div>
+  <div class="nav-right">
+    <a href="/login" class="login-btn">Log in</a>
+  </div>
+</nav>
+
+<main>
+
+  <section class="hero">
+    <div class="particle-field" id="particleField"></div>
+    <div class="cube-stage">
+      <div class="cube">
+        <div class="face f1"></div>
+        <div class="face f2"></div>
+        <div class="face f3"></div>
+        <div class="face f4"></div>
+        <div class="face f5"></div>
+        <div class="face f6"></div>
+      </div>
+    </div>
+    <div class="hero-copy">
+      <div class="badge"><span class="dot"></span>Automated Web Security Assessment</div>
+      <h1>See what attackers<br>find <em>before they do.</em></h1>
+      <p class="lede">
+        WebSentinel runs authorized scans through an integrated OWASP ZAP engine,
+        then turns the raw output into structured, prioritized security findings
+        your team can act on the same day.
+      </p>
+      <div class="hero-ctas">
+        <span class="cta3d"><a href="/login" class="cta">Start a security scan</a></span>
+        <a href="#platform" class="cta-ghost">
+          See a sample report
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat"><b>2,400+</b><span>scans run to date</span></div>
+        <div class="stat"><b>18 min</b><span>avg. time to first finding</span></div>
+        <div class="stat"><b>40+</b><span>vulnerability classes covered</span></div>
+      </div>
+    </div>
+
+    <div class="orb-stage" id="orbStage">
+      <div class="orb-wrap" id="orbWrap">
+        <div class="ring"></div>
+        <div class="ring"></div>
+        <div class="ring"></div>
+        <div class="ring"></div>
+        <div class="sweep"></div>
+        <div class="orb-core"></div>
+        <div class="node crit n1"></div>
+        <div class="node n2"></div>
+        <div class="node crit n3"></div>
+        <div class="node n4"></div>
+      </div>
+      <div class="float-chip chip-1">● 2 critical found</div>
+      <div class="float-chip chip-2">scan target: /checkout</div>
+      <div class="float-chip chip-3">TLS · headers · auth</div>
+    </div>
+  </section>
+
+  <section class="shell" id="platform">
+    <div class="terminal-row reveal">
+      <div class="terminal">
+        <div class="term-head">
+          <div class="term-dot" style="background:#ff6a6a"></div>
+          <div class="term-dot" style="background:#ffb454"></div>
+          <div class="term-dot" style="background:#6ee7a0"></div>
+          <span>zap-scan — target.example.com</span>
+        </div>
+        <div class="term-body">
+<span class="muted">$</span> websentinel scan --target https://target.example.com<br>
+<span class="cyan">›</span> spidering site map <span class="ok">done</span> (142 urls)<br>
+<span class="cyan">›</span> passive scan <span class="ok">done</span><br>
+<span class="cyan">›</span> active scan <span class="muted">running…</span> 74%<br><br>
+<span class="crit">[CRITICAL]</span> SQL Injection — /checkout/apply-coupon<br>
+<span class="warn">[HIGH]</span> Missing Content-Security-Policy header<br>
+<span class="warn">[HIGH]</span> Session cookie without Secure flag<br>
+<span class="cyan">[MEDIUM]</span> Verbose server error disclosure<br><br>
+<span class="muted">writing structured report → findings.json</span><span class="caret"></span>
+        </div>
+      </div>
+      <div class="terminal-copy">
+        <h2>Raw scan output, made readable.</h2>
+        <p>
+          ZAP produces thousands of lines of raw output per scan. WebSentinel parses
+          it in real time and organizes it into findings your team can actually
+          triage — by severity, endpoint, and confidence.
+        </p>
+        <div class="kv-list">
+          <div class="kv"><span class="mark">01</span><span>Every finding is mapped to an OWASP category and CWE ID.</span></div>
+          <div class="kv"><span class="mark">02</span><span>Duplicate and low-confidence alerts are filtered automatically.</span></div>
+          <div class="kv"><span class="mark">03</span><span>Reports export straight to your ticketing system.</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="shell" id="process">
+    <div class="eyebrow-row reveal">
+      <h2 class="section-title">From target URL to structured findings, in three steps.</h2>
+      <p class="section-sub">No agents to install. Point WebSentinel at an authorized target and let the scan engine do the rest.</p>
+    </div>
+    <div class="steps reveal">
+      <div class="step">
+        <div class="flip-inner">
+          <div class="flip-face flip-front">
+            <span class="num">01</span>
+            <h3>Enter a target</h3>
+            <span class="hint">hover to expand →</span>
+          </div>
+          <div class="flip-face flip-back">
+            <p>Confirm ownership, set scope and rate limits, then submit the URL you're authorized to test. WebSentinel validates the target before anything runs.</p>
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="flip-inner">
+          <div class="flip-face flip-front">
+            <span class="num">02</span>
+            <h3>Automated scan runs</h3>
+            <span class="hint">hover to expand →</span>
+          </div>
+          <div class="flip-face flip-back">
+            <p>ZAP crawls, spiders, and actively probes the target while WebSentinel streams progress live to your dashboard, request by request.</p>
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="flip-inner">
+          <div class="flip-face flip-front">
+            <span class="num">03</span>
+            <h3>Review structured findings</h3>
+            <span class="hint">hover to expand →</span>
+          </div>
+          <div class="flip-face flip-back">
+            <p>Get a prioritized report with severity, evidence, and remediation guidance for every issue, ready to export to your ticketing system.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="shell" id="findings">
+    <div class="eyebrow-row reveal">
+      <h2 class="section-title">A dashboard built for investigating findings, not just listing them.</h2>
+      <p class="section-sub">Tilt a card — this is how it feels to work inside the actual dashboard.</p>
+    </div>
+    <div class="findings-grid reveal" id="tiltGrid">
+      <div class="fcard big" data-tilt>
+        <span class="pill red">Live scan summary</span>
+        <h4>Severity distribution — target.example.com</h4>
+        <p>Findings from the most recent active scan, ranked by exploitability and impact.</p>
+        <div class="sev-bar">
+          <div class="bar bar-crit"></div>
+          <div class="bar bar-high"></div>
+          <div class="bar bar-med"></div>
+          <div class="bar bar-low"></div>
+        </div>
+        <div class="sev-labels">
+          <span>CRITICAL · 2</span><span>HIGH · 6</span><span>MEDIUM · 11</span><span>LOW · 5</span>
+        </div>
+      </div>
+      <div class="fcard" data-tilt>
+        <span class="pill amber">Evidence</span>
+        <h4>Request &amp; response capture</h4>
+        <p>Every finding links back to the exact request that triggered it, for one-click verification.</p>
+      </div>
+      <div class="fcard" data-tilt>
+        <span class="pill cyan">Investigation dashboard</span>
+        <h4>Web interface for triage</h4>
+        <p>Assign, comment on, and resolve findings directly from the scan results view.</p>
+      </div>
+      <div class="fcard" data-tilt>
+        <span class="pill cyan">Coverage</span>
+        <h4>OWASP Top 10 mapped</h4>
+        <p>Findings are tagged against current OWASP categories so nothing slips past a compliance review.</p>
+      </div>
+      <div class="fcard" data-tilt>
+        <span class="pill amber">Automation</span>
+        <h4>Scheduled re-scans</h4>
+        <p>Re-run a scan on a schedule and get notified only when new findings appear.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="shell" style="padding-top:0;">
+    <div class="cta-band reveal">
+      <div>
+        <h2>Run your first authorized scan today.</h2>
+        <p>Free for a single target. No credit card required.</p>
+      </div>
+      <span class="cta3d"><a href="/login" class="cta">Start a security scan</a></span>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="logo" style="font-size:15px;">Web<span>Sentinel</span></div>
+  <div class="foot-links">
+    <a href="#platform">Platform</a>
+    <a href="#process">How it works</a>
+    <a href="/login">Log in</a>
+  </div>
+  <div>© 2026 WebSentinel. For use on systems you own or are authorized to test.</div>
+</footer>
+
+<script>
+  // Reveal on scroll
+  const revealEls = document.querySelectorAll('.reveal');
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, { threshold: 0.15 });
+  revealEls.forEach(el=> io.observe(el));
+
+  // Parallax grid on scroll
+  const grid = document.getElementById('grid');
+  window.addEventListener('scroll', ()=>{
+    const y = window.scrollY;
+    grid.style.transform = `translate3d(0, ${y*0.08}px, 0)`;
+  }, { passive:true });
+
+  // Mouse parallax on hero orb + scroll-linked spin + headline 3D tilt
+  const stage = document.getElementById('orbStage');
+  const heroTitle = document.querySelector('.hero h1');
+  let scrollTilt = 0;
+  window.addEventListener('scroll', ()=>{
+    scrollTilt = Math.min(window.scrollY * 0.06, 26);
+  }, { passive:true });
+
+  window.addEventListener('mousemove', (e)=>{
+    const cx = window.innerWidth/2, cy = window.innerHeight/2;
+    const dx = (e.clientX - cx) / cx;
+    const dy = (e.clientY - cy) / cy;
+    stage.style.transform = `rotateY(${dx*8}deg) rotateX(${-dy*8 + scrollTilt}deg)`;
+    if(heroTitle){
+      heroTitle.style.transform = `rotateY(${dx*4}deg) rotateX(${-dy*4}deg)`;
+    }
+  }, { passive:true });
+
+  // Floating parallax particle field (multi-depth)
+  const pField = document.getElementById('particleField');
+  const colors = ['#45c9f0', '#8b7bff', '#ffb454', '#ff6a6a'];
+  const particles = [];
+  const PARTICLE_COUNT = 26;
+  for(let i=0;i<PARTICLE_COUNT;i++){
+    const el = document.createElement('div');
+    el.className = 'particle';
+    const depth = Math.random(); // 0 = far, 1 = near
+    const size = 2 + depth*5;
+    const left = Math.random()*100;
+    const top = Math.random()*100;
+    el.style.width = size+'px';
+    el.style.height = size+'px';
+    el.style.left = left+'%';
+    el.style.top = top+'%';
+    el.style.color = colors[i % colors.length];
+    el.style.background = colors[i % colors.length];
+    el.style.opacity = 0.25 + depth*0.55;
+    pField.appendChild(el);
+    particles.push({ el, depth, baseLeft:left, baseTop:top, phase: Math.random()*Math.PI*2 });
+  }
+
+  let mouseX = 0, mouseY = 0;
+  window.addEventListener('mousemove', (e)=>{
+    mouseX = (e.clientX / window.innerWidth) - 0.5;
+    mouseY = (e.clientY / window.innerHeight) - 0.5;
+  }, { passive:true });
+
+  function animateParticles(t){
+    particles.forEach(p=>{
+      const drift = Math.sin(t/1800 + p.phase) * 6 * (0.4 + p.depth);
+      const px = mouseX * 40 * p.depth;
+      const py = mouseY * 40 * p.depth + drift;
+      p.el.style.transform = `translate3d(${px}px, ${py}px, ${p.depth*80}px)`;
+    });
+    requestAnimationFrame(animateParticles);
+  }
+  requestAnimationFrame(animateParticles);
+
+  // 3D tilt on finding cards
+  document.querySelectorAll('[data-tilt]').forEach(card=>{
+    card.addEventListener('mousemove', (e)=>{
+      const r = card.getBoundingClientRect();
+      const px = (e.clientX - r.left)/r.width - 0.5;
+      const py = (e.clientY - r.top)/r.height - 0.5;
+      card.style.transform = `perspective(900px) rotateY(${px*10}deg) rotateX(${-py*10}deg) translateZ(6px)`;
+    });
+    card.addEventListener('mouseleave', ()=>{
+      card.style.transform = 'perspective(900px) rotateY(0deg) rotateX(0deg) translateZ(0)';
+    });
+  });
+</script>
+
+</body>
+</html>

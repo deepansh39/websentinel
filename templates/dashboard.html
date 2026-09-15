@@ -1,0 +1,1701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Dashboard — WebSentinel</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin
+    >
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet"
+    >
+
+    <style>
+        :root {
+            --bg: #070b12;
+            --panel: #0d131d;
+            --border: rgba(120, 150, 180, 0.16);
+
+            --text: #edf6ff;
+            --muted: #8292a7;
+
+            --cyan: #55e6ff;
+            --violet: #8c7bff;
+            --green: #5cf2a5;
+            --yellow: #ffd166;
+            --orange: #ff9f43;
+            --red: #ff5c7a;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            min-height: 100vh;
+
+            color: var(--text);
+
+            font-family: "IBM Plex Sans", sans-serif;
+
+            background:
+                radial-gradient(
+                    circle at top right,
+                    rgba(85, 230, 255, 0.08),
+                    transparent 30%
+                ),
+                radial-gradient(
+                    circle at bottom left,
+                    rgba(140, 123, 255, 0.08),
+                    transparent 30%
+                ),
+                var(--bg);
+        }
+
+        body::before {
+            content: "";
+
+            position: fixed;
+            inset: 0;
+
+            pointer-events: none;
+
+            opacity: 0.22;
+
+            background-image:
+                linear-gradient(
+                    rgba(255, 255, 255, 0.025) 1px,
+                    transparent 1px
+                ),
+                linear-gradient(
+                    90deg,
+                    rgba(255, 255, 255, 0.025) 1px,
+                    transparent 1px
+                );
+
+            background-size: 48px 48px;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        button,
+        input {
+            font: inherit;
+        }
+
+        .app {
+            display: flex;
+            min-height: 100vh;
+
+            position: relative;
+            z-index: 1;
+        }
+
+        /* =========================
+           SIDEBAR
+        ========================= */
+
+        .sidebar {
+            width: 250px;
+            min-height: 100vh;
+
+            padding: 24px 18px;
+
+            display: flex;
+            flex-direction: column;
+
+            border-right: 1px solid var(--border);
+
+            background:
+                linear-gradient(
+                    180deg,
+                    rgba(13, 19, 29, 0.96),
+                    rgba(7, 11, 18, 0.94)
+                );
+
+            backdrop-filter: blur(20px);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+
+            gap: 12px;
+
+            padding: 4px 8px 28px;
+        }
+
+        .brand-mark {
+            width: 40px;
+            height: 40px;
+
+            display: grid;
+            place-items: center;
+
+            border-radius: 12px;
+
+            color: #061017;
+
+            font-size: 12px;
+            font-weight: 700;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    var(--cyan),
+                    var(--violet)
+                );
+
+            box-shadow:
+                0 0 25px rgba(85, 230, 255, 0.18);
+        }
+
+        .brand-name {
+            font-size: 18px;
+            font-weight: 700;
+
+            letter-spacing: -0.02em;
+        }
+
+        .brand-subtitle {
+            margin-top: 2px;
+
+            color: var(--muted);
+
+            font-size: 10px;
+        }
+
+        .nav-title {
+            padding: 0 10px 10px;
+
+            color: #617085;
+
+            font-family: "IBM Plex Mono", monospace;
+
+            font-size: 10px;
+
+            text-transform: uppercase;
+
+            letter-spacing: 0.14em;
+        }
+
+        .nav {
+            display: flex;
+            flex-direction: column;
+
+            gap: 6px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+
+            gap: 11px;
+
+            padding: 12px;
+
+            border: 1px solid transparent;
+            border-radius: 10px;
+
+            color: #91a0b4;
+
+            font-size: 14px;
+
+            transition:
+                background 0.2s ease,
+                border 0.2s ease,
+                color 0.2s ease,
+                transform 0.2s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--text);
+
+            background:
+                rgba(255, 255, 255, 0.035);
+
+            border-color: var(--border);
+
+            transform: translateX(2px);
+        }
+
+        .nav-link.active {
+            color: var(--cyan);
+
+            background:
+                rgba(85, 230, 255, 0.065);
+
+            border-color:
+                rgba(85, 230, 255, 0.12);
+        }
+
+        .nav-icon {
+            width: 18px;
+            text-align: center;
+        }
+
+        .sidebar-bottom {
+            margin-top: auto;
+        }
+
+        .engine-card {
+            padding: 14px;
+
+            border:
+                1px solid var(--border);
+
+            border-radius: 14px;
+
+            background:
+                rgba(255, 255, 255, 0.025);
+        }
+
+        .engine-label {
+            color: #607087;
+
+            font-family: "IBM Plex Mono", monospace;
+
+            font-size: 10px;
+
+            text-transform: uppercase;
+
+            letter-spacing: 0.11em;
+        }
+
+        .engine-status {
+            display: flex;
+            align-items: center;
+
+            gap: 8px;
+
+            margin-top: 10px;
+
+            color: #b8c7d9;
+
+            font-size: 12px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+
+            flex-shrink: 0;
+
+            border-radius: 50%;
+
+            background: var(--green);
+
+            box-shadow:
+                0 0 12px rgba(92, 242, 165, 0.65);
+        }
+
+        .logout {
+            display: block;
+
+            margin-top: 10px;
+
+            padding: 11px 12px;
+
+            border-radius: 10px;
+
+            color: #7f8da0;
+
+            font-size: 13px;
+
+            transition:
+                background 0.2s ease,
+                color 0.2s ease;
+        }
+
+        .logout:hover {
+            color: var(--text);
+
+            background:
+                rgba(255, 255, 255, 0.035);
+        }
+
+        /* =========================
+           MAIN
+        ========================= */
+
+        .main {
+            flex: 1;
+            min-width: 0;
+
+            padding: 28px 32px 55px;
+        }
+
+        .topbar {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+
+            gap: 20px;
+
+            margin-bottom: 30px;
+        }
+
+        .page-title {
+            font-size: 29px;
+
+            letter-spacing: -0.04em;
+        }
+
+        .page-description {
+            margin-top: 7px;
+
+            color: var(--muted);
+
+            font-size: 14px;
+        }
+
+        .system-status {
+            display: inline-flex;
+            align-items: center;
+
+            gap: 8px;
+
+            padding: 9px 12px;
+
+            border:
+                1px solid rgba(92, 242, 165, 0.13);
+
+            border-radius: 999px;
+
+            color: var(--green);
+
+            background:
+                rgba(92, 242, 165, 0.05);
+
+            font-family: "IBM Plex Mono", monospace;
+
+            font-size: 10px;
+
+            text-transform: uppercase;
+        }
+
+        /* =========================
+           ERROR
+        ========================= */
+
+        .error-box {
+            margin-bottom: 20px;
+
+            padding: 14px 16px;
+
+            border:
+                1px solid rgba(255, 92, 122, 0.2);
+
+            border-radius: 12px;
+
+            color: var(--red);
+
+            background:
+                rgba(255, 92, 122, 0.05);
+
+            font-size: 12px;
+        }
+
+        /* =========================
+           NEW SCAN
+        ========================= */
+
+        .scan-card {
+            position: relative;
+            overflow: hidden;
+
+            padding: 28px;
+
+            border:
+                1px solid rgba(85, 230, 255, 0.13);
+
+            border-radius: 20px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    rgba(85, 230, 255, 0.045),
+                    rgba(140, 123, 255, 0.045)
+                );
+
+            box-shadow:
+                0 25px 70px rgba(0, 0, 0, 0.28);
+        }
+
+        .scan-card::after {
+            content: "";
+
+            position: absolute;
+
+            width: 280px;
+            height: 280px;
+
+            top: -140px;
+            right: -120px;
+
+            border-radius: 50%;
+
+            background:
+                radial-gradient(
+                    circle,
+                    rgba(85, 230, 255, 0.11),
+                    transparent 68%
+                );
+
+            pointer-events: none;
+        }
+
+        .scan-card-header {
+            position: relative;
+            z-index: 1;
+        }
+
+        .scan-eyebrow {
+            color: var(--cyan);
+
+            font-family: "IBM Plex Mono", monospace;
+
+            font-size: 10px;
+
+            text-transform: uppercase;
+
+            letter-spacing: 0.14em;
+        }
+
+        .scan-title {
+            margin-top: 8px;
+
+            font-size: 23px;
+
+            letter-spacing: -0.03em;
+        }
+
+        .scan-description {
+            max-width: 650px;
+
+            margin-top: 7px;
+
+            color: var(--muted);
+
+            font-size: 13px;
+
+            line-height: 1.7;
+        }
+
+        .scan-form {
+            position: relative;
+            z-index: 1;
+
+            display: flex;
+
+            gap: 10px;
+
+            margin-top: 24px;
+        }
+
+        .target-input {
+            flex: 1;
+
+            min-width: 0;
+            height: 50px;
+
+            padding: 0 15px;
+
+            border:
+                1px solid rgba(120, 150, 180, 0.2);
+
+            border-radius: 11px;
+
+            outline: none;
+
+            color: var(--text);
+
+            background:
+                rgba(5, 9, 15, 0.65);
+
+            font-family: "IBM Plex Mono", monospace;
+
+            font-size: 12px;
+        }
+
+        .target-input::placeholder {
+            color: #526176;
+        }
+
+        .target-input:focus {
+            border-color:
+                rgba(85, 230, 255, 0.4);
+
+            box-shadow:
+                0 0 0 3px rgba(85, 230, 255, 0.06);
+        }
+
+        .scan-btn {
+            height: 50px;
+
+            padding: 0 22px;
+
+            border: none;
+            border-radius: 11px;
+
+            cursor: pointer;
+
+            color: #071017;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    var(--cyan),
+                    #79cfff
+                );
+
+            font-weight: 700;
+            font-size: 12px;
+
+            transition:
+                transform 0.2s ease,
+                box-shadow 0.2s ease,
+                filter 0.2s ease;
+        }
+
+        .scan-btn:hover {
+            transform: translateY(-1px);
+
+            filter: brightness(1.05);
+
+            box-shadow:
+                0 15px 35px rgba(85, 230, 255, 0.18);
+        }
+
+        .scan-btn:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+
+            transform: none;
+        }
+
+        .authorization {
+            position: relative;
+            z-index: 1;
+
+            display: flex;
+            align-items: flex-start;
+
+            gap: 10px;
+
+            margin-top: 17px;
+
+            padding: 12px 14px;
+
+            border:
+                1px solid rgba(255, 209, 102, 0.12);
+
+            border-radius: 10px;
+
+            color: #a9b6c6;
+
+            background:
+                rgba(255, 209, 102, 0.035);
+
+            font-size: 11px;
+
+            line-height: 1.6;
+        }
+
+        .authorization-icon {
+            flex-shrink: 0;
+
+            color: var(--yellow);
+        }
+
+        /* =========================
+           OVERVIEW
+        ========================= */
+
+        .section-title-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            margin: 32px 0 14px;
+        }
+
+        .section-title {
+            font-size: 17px;
+        }
+
+        .section-subtitle {
+            margin-top: 5px;
+
+            color: var(--muted);
+
+            font-size: 11px;
+        }
+
+        .stats-grid {
+            display: grid;
+
+            grid-template-columns:
+                repeat(4, minmax(0, 1fr));
+
+            gap: 14px;
+        }
+
+        .stat-card {
+            padding: 18px;
+
+            border:
+                1px solid var(--border);
+
+            border-radius: 16px;
+
+            background:
+                rgba(255, 255, 255, 0.018);
+        }
+
+        .stat-label {
+            color: var(--muted);
+
+            font-size: 11px;
+        }
+
+        .stat-value {
+            margin-top: 12px;
+
+            font-size: 28px;
+            font-weight: 700;
+
+            letter-spacing: -0.05em;
+        }
+
+        .stat-note {
+            margin-top: 5px;
+
+            color: #647489;
+
+            font-size: 10px;
+        }
+
+        /* =========================
+           HISTORY
+        ========================= */
+
+        .history-section {
+            margin-top: 30px;
+
+            padding: 20px;
+
+            border:
+                1px solid var(--border);
+
+            border-radius: 18px;
+
+            background:
+                rgba(13, 19, 29, 0.72);
+        }
+
+        .section-heading {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            gap: 15px;
+
+            margin-bottom: 18px;
+        }
+
+        .section-heading h2 {
+            font-size: 17px;
+        }
+
+        .section-heading p {
+            margin-top: 5px;
+
+            color: var(--muted);
+
+            font-size: 12px;
+        }
+
+        .history-count {
+            flex-shrink: 0;
+
+            padding: 6px 10px;
+
+            border-radius: 999px;
+
+            color: var(--cyan);
+
+            background:
+                rgba(85, 230, 255, 0.06);
+
+            font-family: "IBM Plex Mono", monospace;
+
+            font-size: 10px;
+        }
+
+        .history-table-wrap {
+            width: 100%;
+
+            overflow-x: auto;
+        }
+
+        .history-table {
+            width: 100%;
+
+            min-width: 820px;
+
+            border-collapse: collapse;
+        }
+
+        .history-table th {
+            padding: 12px;
+
+            text-align: left;
+
+            color: #647489;
+
+            font-family: "IBM Plex Mono", monospace;
+
+            font-size: 10px;
+            font-weight: 500;
+
+            text-transform: uppercase;
+
+            letter-spacing: 0.08em;
+        }
+
+        .history-table td {
+            padding: 16px 12px;
+
+            border-top:
+                1px solid var(--border);
+
+            font-size: 12px;
+        }
+
+        .history-target {
+            max-width: 380px;
+
+            overflow: hidden;
+
+            color: #dce9f5;
+
+            font-family: "IBM Plex Mono", monospace;
+
+            text-overflow: ellipsis;
+
+            white-space: nowrap;
+        }
+
+        .history-id {
+            margin-top: 5px;
+
+            color: #56667a;
+
+            font-family: "IBM Plex Mono", monospace;
+
+            font-size: 9px;
+        }
+
+        .history-status {
+            display: inline-block;
+
+            padding: 5px 8px;
+
+            border-radius: 7px;
+
+            font-family: "IBM Plex Mono", monospace;
+
+            font-size: 9px;
+        }
+
+        .history-status.complete {
+            color: var(--green);
+
+            background:
+                rgba(92, 242, 165, 0.08);
+        }
+
+        .history-status.failed {
+            color: var(--red);
+
+            background:
+                rgba(255, 92, 122, 0.08);
+        }
+
+        .history-status.running {
+            color: var(--cyan);
+
+            background:
+                rgba(85, 230, 255, 0.08);
+        }
+
+        .history-progress {
+            display: flex;
+            align-items: center;
+
+            gap: 8px;
+
+            min-width: 150px;
+
+            color: #8292a7;
+
+            font-family: "IBM Plex Mono", monospace;
+
+            font-size: 10px;
+        }
+
+        .history-progress-track {
+            flex: 1;
+
+            height: 6px;
+
+            overflow: hidden;
+
+            border-radius: 999px;
+
+            background:
+                rgba(255, 255, 255, 0.05);
+        }
+
+        .history-progress-bar {
+            height: 100%;
+
+            border-radius: inherit;
+
+            background:
+                linear-gradient(
+                    90deg,
+                    var(--cyan),
+                    var(--violet)
+                );
+        }
+
+        .history-date {
+            color: #8292a7;
+
+            font-family: "IBM Plex Mono", monospace;
+
+            font-size: 10px;
+
+            white-space: nowrap;
+        }
+
+        .history-action {
+            display: inline-block;
+
+            padding: 7px 10px;
+
+            border:
+                1px solid var(--border);
+
+            border-radius: 8px;
+
+            color: #9cafc1;
+
+            font-size: 10px;
+
+            transition:
+                color 0.2s ease,
+                background 0.2s ease,
+                border 0.2s ease;
+        }
+
+        .history-action:hover {
+            color: var(--cyan);
+
+            border-color:
+                rgba(85, 230, 255, 0.18);
+
+            background:
+                rgba(85, 230, 255, 0.04);
+        }
+
+        .history-empty {
+            padding: 50px 20px;
+
+            text-align: center;
+
+            border:
+                1px dashed var(--border);
+
+            border-radius: 14px;
+        }
+
+        .history-empty-icon {
+            margin-bottom: 12px;
+
+            color: var(--cyan);
+
+            font-size: 28px;
+        }
+
+        .history-empty h3 {
+            font-size: 14px;
+        }
+
+        .history-empty p {
+            max-width: 400px;
+
+            margin: 7px auto 0;
+
+            color: var(--muted);
+
+            font-size: 12px;
+
+            line-height: 1.6;
+        }
+
+        /* =========================
+           SECURITY NOTE
+        ========================= */
+
+        .security-note {
+            display: flex;
+            align-items: flex-start;
+
+            gap: 10px;
+
+            margin-top: 18px;
+
+            padding: 14px 16px;
+
+            border:
+                1px solid rgba(85, 230, 255, 0.09);
+
+            border-radius: 12px;
+
+            color: #718298;
+
+            background:
+                rgba(85, 230, 255, 0.022);
+
+            font-size: 10px;
+
+            line-height: 1.6;
+        }
+
+        .security-note strong {
+            color: #9aacbf;
+        }
+
+        .security-icon {
+            flex-shrink: 0;
+
+            color: var(--cyan);
+        }
+
+        /* =========================
+           RESPONSIVE
+        ========================= */
+
+        @media (max-width: 1120px) {
+
+            .sidebar {
+                width: 220px;
+            }
+
+            .main {
+                padding: 24px;
+            }
+
+            .stats-grid {
+                grid-template-columns:
+                    repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 800px) {
+
+            .sidebar {
+                display: none;
+            }
+
+            .main {
+                padding: 20px 16px 40px;
+            }
+
+            .topbar {
+                flex-direction: column;
+            }
+
+            .scan-form {
+                flex-direction: column;
+            }
+
+            .scan-btn {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 520px) {
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .page-title {
+                font-size: 24px;
+            }
+
+            .section-heading {
+                align-items: flex-start;
+
+                flex-direction: column;
+            }
+
+            .history-count {
+                align-self: flex-start;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="app">
+
+    <!-- =========================
+         SIDEBAR
+    ========================= -->
+
+    <aside class="sidebar">
+
+        <div class="brand">
+
+            <div class="brand-mark">
+                WS
+            </div>
+
+            <div>
+                <div class="brand-name">
+                    WebSentinel
+                </div>
+
+                <div class="brand-subtitle">
+                    Security Assessment
+                </div>
+            </div>
+
+        </div>
+
+
+        <div class="nav-title">
+            Workspace
+        </div>
+
+
+        <nav class="nav">
+
+            <!-- IMPORTANT:
+                 No generic url_for('results') here.
+            -->
+
+            <a
+                href="{{ url_for('dashboard') }}"
+                class="nav-link active"
+            >
+                <span class="nav-icon">⌂</span>
+                Dashboard
+            </a>
+
+
+            <a
+                href="{{ url_for('dashboard') }}#new-scan"
+                class="nav-link"
+            >
+                <span class="nav-icon">⌁</span>
+                New Scan
+            </a>
+
+        </nav>
+
+
+        <div class="sidebar-bottom">
+
+            <div class="engine-card">
+
+                <div class="engine-label">
+                    Scanner Engine
+                </div>
+
+                <div class="engine-status">
+
+                    <span class="status-dot"></span>
+
+                    OWASP ZAP
+
+                </div>
+
+            </div>
+
+
+            <a
+                href="{{ url_for('logout') }}"
+                class="logout"
+            >
+                Sign out
+            </a>
+
+        </div>
+
+    </aside>
+
+
+    <!-- =========================
+         MAIN
+    ========================= -->
+
+    <main class="main">
+
+        <!-- TOPBAR -->
+
+        <div class="topbar">
+
+            <div>
+
+                <h1 class="page-title">
+                    Security Dashboard
+                </h1>
+
+                <p class="page-description">
+                    Run authorized web security assessments and review scan activity.
+                </p>
+
+            </div>
+
+
+            <div class="system-status">
+
+                <span class="status-dot"></span>
+
+                Scanner Online
+
+            </div>
+
+        </div>
+
+
+        <!-- ERROR -->
+
+        {% if error %}
+
+            <div class="error-box">
+                {{ error }}
+            </div>
+
+        {% endif %}
+
+
+        <!-- =========================
+             NEW SCAN
+        ========================= -->
+
+        <section
+            class="scan-card"
+            id="new-scan"
+        >
+
+            <div class="scan-card-header">
+
+                <div class="scan-eyebrow">
+                    Security Assessment
+                </div>
+
+                <h2 class="scan-title">
+                    Start a New Scan
+                </h2>
+
+                <p class="scan-description">
+                    Enter an authorized web application target.
+                    WebSentinel will launch OWASP ZAP through Docker,
+                    collect the generated reports, and process the findings.
+                </p>
+
+            </div>
+
+
+            <form
+                class="scan-form"
+                method="POST"
+                action="{{ url_for('start_scan') }}"
+                id="scanForm"
+            >
+
+                <input
+                    class="target-input"
+                    type="url"
+                    name="target"
+                    id="target"
+                    placeholder="https://example.com"
+                    autocomplete="off"
+                    required
+                >
+
+
+                <button
+                    class="scan-btn"
+                    type="submit"
+                    id="scanButton"
+                >
+                    Start Scan
+                </button>
+
+            </form>
+
+
+            <div class="authorization">
+
+                <div class="authorization-icon">
+                    ⚠
+                </div>
+
+                <div>
+                    <strong>Authorized targets only.</strong>
+                    Scan only applications and systems that you own
+                    or have explicit permission to assess.
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================
+             OVERVIEW
+        ========================= -->
+
+        <div class="section-title-row">
+
+            <div>
+
+                <h2 class="section-title">
+                    Scan Overview
+                </h2>
+
+                <div class="section-subtitle">
+                    Persistent security assessment records
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <section class="stats-grid">
+
+            <!-- TOTAL -->
+
+            <div class="stat-card">
+
+                <div class="stat-label">
+                    Total Scans
+                </div>
+
+                <div class="stat-value">
+                    {{ scans|length }}
+                </div>
+
+                <div class="stat-note">
+                    Recorded assessments
+                </div>
+
+            </div>
+
+
+            <!-- COMPLETED -->
+
+            <div class="stat-card">
+
+                <div class="stat-label">
+                    Completed
+                </div>
+
+                <div class="stat-value">
+
+                    {{
+                        scans
+                        |selectattr(
+                            "status",
+                            "equalto",
+                            "COMPLETE"
+                        )
+                        |list
+                        |length
+                    }}
+
+                </div>
+
+                <div class="stat-note">
+                    Finished assessments
+                </div>
+
+            </div>
+
+
+            <!-- ACTIVE -->
+
+            <div class="stat-card">
+
+                <div class="stat-label">
+                    Active
+                </div>
+
+                <div class="stat-value">
+
+                    {{
+                        scans
+                        |selectattr(
+                            "status",
+                            "in",
+                            [
+                                "QUEUED",
+                                "STARTING",
+                                "RUNNING",
+                                "COLLECTING"
+                            ]
+                        )
+                        |list
+                        |length
+                    }}
+
+                </div>
+
+                <div class="stat-note">
+                    Queued or running
+                </div>
+
+            </div>
+
+
+            <!-- FAILED -->
+
+            <div class="stat-card">
+
+                <div class="stat-label">
+                    Failed
+                </div>
+
+                <div class="stat-value">
+
+                    {{
+                        scans
+                        |selectattr(
+                            "status",
+                            "equalto",
+                            "FAILED"
+                        )
+                        |list
+                        |length
+                    }}
+
+                </div>
+
+                <div class="stat-note">
+                    Failed assessments
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================
+             SCAN HISTORY
+        ========================= -->
+
+        <section class="history-section">
+
+            <div class="section-heading">
+
+                <div>
+
+                    <h2>
+                        Scan History
+                    </h2>
+
+                    <p>
+                        Previous WebSentinel security assessments
+                    </p>
+
+                </div>
+
+
+                <span class="history-count">
+                    {{ scans|length }} scans
+                </span>
+
+            </div>
+
+
+            {% if scans %}
+
+                <div class="history-table-wrap">
+
+                    <table class="history-table">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Target
+                                </th>
+
+                                <th>
+                                    Status
+                                </th>
+
+                                <th>
+                                    Progress
+                                </th>
+
+                                <th>
+                                    Started
+                                </th>
+
+                                <th>
+                                    Action
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                        {% for scan in scans %}
+
+                            <tr>
+
+                                <!-- TARGET -->
+
+                                <td>
+
+                                    <div
+                                        class="history-target"
+                                        title="{{ scan.target }}"
+                                    >
+                                        {{ scan.target }}
+                                    </div>
+
+                                    <div class="history-id">
+                                        {{ scan.id }}
+                                    </div>
+
+                                </td>
+
+
+                                <!-- STATUS -->
+
+                                <td>
+
+                                    {% if scan.status == "COMPLETE" %}
+
+                                        <span class="history-status complete">
+                                            COMPLETE
+                                        </span>
+
+                                    {% elif scan.status == "FAILED" %}
+
+                                        <span class="history-status failed">
+                                            FAILED
+                                        </span>
+
+                                    {% else %}
+
+                                        <span class="history-status running">
+                                            {{ scan.status }}
+                                        </span>
+
+                                    {% endif %}
+
+                                </td>
+
+
+                                <!-- PROGRESS -->
+
+                                <td>
+
+                                    <div class="history-progress">
+
+                                        <div class="history-progress-track">
+
+                                            <div
+                                                class="history-progress-bar"
+                                                style="width: {{ scan.progress }}%;"
+                                            ></div>
+
+                                        </div>
+
+                                        <span>
+                                            {{ scan.progress }}%
+                                        </span>
+
+                                    </div>
+
+                                </td>
+
+
+                                <!-- DATE -->
+
+                                <td>
+
+                                    <div class="history-date">
+
+                                        {% if scan.started_at %}
+
+                                            {{ scan.started_at[:19].replace("T", " ") }}
+
+                                        {% else %}
+
+                                            —
+
+                                        {% endif %}
+
+                                    </div>
+
+                                </td>
+
+
+                                <!-- ACTION -->
+
+                                <td>
+
+                                    {% if scan.status == "COMPLETE" %}
+
+                                        <a
+                                            href="{{ url_for('results', scan_id=scan.id) }}"
+                                            class="history-action"
+                                        >
+                                            View Results
+                                        </a>
+
+                                    {% else %}
+
+                                        <a
+                                            href="{{ url_for('scan_status', scan_id=scan.id) }}"
+                                            class="history-action"
+                                        >
+                                            View Scan
+                                        </a>
+
+                                    {% endif %}
+
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+
+            {% else %}
+
+                <div class="history-empty">
+
+                    <div class="history-empty-icon">
+                        ◫
+                    </div>
+
+                    <h3>
+                        No scans yet
+                    </h3>
+
+                    <p>
+                        Start your first authorized security assessment
+                        and completed scans will appear here.
+                    </p>
+
+                </div>
+
+            {% endif %}
+
+        </section>
+
+
+        <!-- =========================
+             SECURITY NOTE
+        ========================= -->
+
+        <div class="security-note">
+
+            <div class="security-icon">
+                ◈
+            </div>
+
+            <div>
+
+                <strong>WebSentinel workflow:</strong>
+
+                target validation →
+                scan job creation →
+                Dockerized OWASP ZAP →
+                report collection →
+                JSON parsing →
+                finding normalization.
+
+            </div>
+
+        </div>
+
+    </main>
+
+</div>
+
+
+<script>
+
+    const scanForm =
+        document.getElementById("scanForm");
+
+    const scanButton =
+        document.getElementById("scanButton");
+
+    const targetInput =
+        document.getElementById("target");
+
+
+    scanForm.addEventListener(
+        "submit",
+        function () {
+
+            if (!targetInput.value.trim()) {
+                return;
+            }
+
+            scanButton.disabled = true;
+
+            scanButton.textContent =
+                "Starting Scan…";
+        }
+    );
+
+</script>
+
+</body>
+</html>

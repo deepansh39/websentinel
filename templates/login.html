@@ -1,0 +1,1724 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>WebSentinel | Log in</title>
+
+    <style>
+        @import url('https://cdnjs.cloudflare.com/ajax/libs/ibm-plex/6.4.1/css/ibm-plex-sans.min.css');
+
+        :root {
+            --bg: #05070d;
+            --panel: #0d111c;
+            --line: rgba(148, 163, 196, 0.14);
+            --line-bright: rgba(148, 163, 196, 0.28);
+
+            --cyan: #45c9f0;
+            --cyan-soft: rgba(69, 201, 240, 0.14);
+
+            --violet: #8b7bff;
+            --amber: #ffb454;
+            --red: #ff6a6a;
+            --green: #6ee7a0;
+
+            --text: #eef2f8;
+            --text-dim: #8791a3;
+            --text-mute: #5b6478;
+
+            --mono:
+                'JetBrains Mono',
+                'IBM Plex Mono',
+                ui-monospace,
+                SFMono-Regular,
+                Menlo,
+                monospace;
+
+            --sans:
+                'IBM Plex Sans',
+                -apple-system,
+                BlinkMacSystemFont,
+                'Segoe UI',
+                sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+
+            background: var(--bg);
+            color: var(--text);
+
+            font-family: var(--sans);
+
+            overflow-x: hidden;
+
+            -webkit-font-smoothing: antialiased;
+
+            display: grid;
+
+            grid-template-columns: 1.1fr 1fr;
+        }
+
+        ::selection {
+            background: var(--cyan);
+            color: #00131a;
+        }
+
+        a {
+            color: inherit;
+        }
+
+        /* =========================================================
+           BACKGROUND
+        ========================================================= */
+
+        #field {
+            position: fixed;
+
+            inset: 0;
+
+            z-index: 0;
+
+            pointer-events: none;
+
+            background:
+                radial-gradient(
+                    ellipse 900px 600px at 12% 15%,
+                    rgba(69, 201, 240, 0.10),
+                    transparent 60%
+                ),
+                radial-gradient(
+                    ellipse 700px 700px at 95% 85%,
+                    rgba(139, 123, 255, 0.09),
+                    transparent 60%
+                );
+        }
+
+        #grid {
+            position: fixed;
+
+            inset: -10%;
+
+            z-index: 0;
+
+            pointer-events: none;
+
+            background-image:
+                linear-gradient(
+                    var(--line) 1px,
+                    transparent 1px
+                ),
+                linear-gradient(
+                    90deg,
+                    var(--line) 1px,
+                    transparent 1px
+                );
+
+            background-size: 64px 64px;
+
+            -webkit-mask-image:
+                radial-gradient(
+                    ellipse 60% 60% at 25% 40%,
+                    black 10%,
+                    transparent 75%
+                );
+
+            mask-image:
+                radial-gradient(
+                    ellipse 60% 60% at 25% 40%,
+                    black 10%,
+                    transparent 75%
+                );
+
+            opacity: 0.5;
+        }
+
+        /* =========================================================
+           LEFT BRAND PANEL
+        ========================================================= */
+
+        .brand-panel {
+            position: relative;
+
+            z-index: 1;
+
+            display: flex;
+
+            flex-direction: column;
+
+            justify-content: space-between;
+
+            padding:
+                44px
+                clamp(28px, 5vw, 72px);
+
+            border-right:
+                1px solid var(--line);
+
+            perspective: 1400px;
+        }
+
+        .logo {
+            display: flex;
+
+            align-items: center;
+
+            gap: 10px;
+
+            font-size: 18px;
+
+            font-weight: 600;
+
+            letter-spacing: -0.01em;
+        }
+
+        .logo-mark {
+            width: 26px;
+            height: 26px;
+
+            flex-shrink: 0;
+        }
+
+        .logo-mark svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .logo span {
+            color: var(--cyan);
+        }
+
+        .brand-mid {
+            max-width: 460px;
+        }
+
+        .brand-mid .badge {
+            display: inline-flex;
+
+            align-items: center;
+
+            gap: 8px;
+
+            padding:
+                7px
+                14px;
+
+            border:
+                1px solid rgba(69, 201, 240, 0.3);
+
+            border-radius: 999px;
+
+            color: var(--cyan);
+
+            background: var(--cyan-soft);
+
+            font-size: 12.5px;
+
+            font-family: var(--mono);
+
+            margin-bottom: 26px;
+        }
+
+        .brand-mid .dot {
+            width: 6px;
+            height: 6px;
+
+            border-radius: 50%;
+
+            background: var(--cyan);
+
+            box-shadow:
+                0 0 8px var(--cyan);
+
+            animation:
+                pulse 1.8s infinite;
+        }
+
+        .brand-mid h1 {
+            font-size:
+                clamp(30px, 3.2vw, 42px);
+
+            line-height: 1.12;
+
+            letter-spacing: -0.02em;
+
+            font-weight: 600;
+
+            text-shadow:
+                0 1px 0 rgba(69, 201, 240, 0.45),
+                0 2px 0 rgba(69, 201, 240, 0.35),
+                0 3px 0 rgba(69, 201, 240, 0.25),
+                0 12px 26px rgba(0, 0, 0, 0.5);
+        }
+
+        .brand-mid h1 em {
+            font-style: normal;
+
+            background:
+                linear-gradient(
+                    100deg,
+                    var(--cyan),
+                    var(--violet) 85%
+                );
+
+            -webkit-background-clip: text;
+            background-clip: text;
+
+            color: transparent;
+        }
+
+        .brand-mid p {
+            margin-top: 18px;
+
+            color: var(--text-dim);
+
+            font-size: 15px;
+
+            line-height: 1.65;
+
+            max-width: 400px;
+        }
+
+        /* =========================================================
+           TERMINAL
+        ========================================================= */
+
+        .mini-terminal {
+            margin-top: 34px;
+
+            background:
+                linear-gradient(
+                    180deg,
+                    #0f1420,
+                    #0a0d16
+                );
+
+            border:
+                1px solid var(--line-bright);
+
+            border-radius: 12px;
+
+            overflow: hidden;
+
+            box-shadow:
+                0 30px 70px rgba(0, 0, 0, 0.5);
+
+            transform:
+                perspective(1000px)
+                rotateY(4deg)
+                rotateX(2deg);
+
+            transition:
+                transform 0.4s ease;
+
+            max-width: 420px;
+        }
+
+        .mini-terminal:hover {
+            transform:
+                perspective(1000px)
+                rotateY(0deg)
+                rotateX(0deg);
+        }
+
+        .mt-head {
+            display: flex;
+
+            gap: 6px;
+
+            padding: 10px 14px;
+
+            border-bottom:
+                1px solid var(--line);
+
+            background:
+                rgba(255, 255, 255, 0.02);
+        }
+
+        .mt-dot {
+            width: 8px;
+            height: 8px;
+
+            border-radius: 50%;
+        }
+
+        .mt-body {
+            padding: 16px;
+
+            font-family: var(--mono);
+
+            font-size: 12.2px;
+
+            line-height: 1.85;
+
+            color: var(--text-dim);
+        }
+
+        .mt-body .ok {
+            color: #6ee7a0;
+        }
+
+        .mt-body .cyan {
+            color: var(--cyan);
+        }
+
+        .mt-body .warn {
+            color: var(--amber);
+        }
+
+        .caret {
+            display: inline-block;
+
+            width: 7px;
+            height: 13px;
+
+            background: var(--cyan);
+
+            vertical-align: middle;
+
+            animation:
+                pulse 1s infinite;
+        }
+
+        .brand-foot {
+            display: flex;
+
+            gap: 36px;
+
+            color: var(--text-mute);
+
+            font-size: 12.5px;
+        }
+
+        .brand-foot b {
+            display: block;
+
+            color: var(--text);
+
+            font-family: var(--mono);
+
+            font-size: 19px;
+
+            font-weight: 500;
+        }
+
+        @keyframes pulse {
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.35;
+            }
+        }
+
+        /* =========================================================
+           AMBIENT ORB
+        ========================================================= */
+
+        .deco-orb {
+            position: absolute;
+
+            right: -90px;
+            bottom: -90px;
+
+            width: 280px;
+            height: 280px;
+
+            border-radius: 50%;
+
+            pointer-events: none;
+
+            z-index: 0;
+
+            background:
+                radial-gradient(
+                    circle at 35% 30%,
+                    rgba(69, 201, 240, 0.16),
+                    transparent 70%
+                );
+
+            border:
+                1px solid rgba(69, 201, 240, 0.15);
+        }
+
+        .deco-orb::before,
+        .deco-orb::after {
+            content: "";
+
+            position: absolute;
+
+            inset: 34px;
+
+            border-radius: 50%;
+
+            border:
+                1px solid rgba(139, 123, 255, 0.14);
+        }
+
+        .deco-orb::after {
+            inset: 80px;
+
+            border-color:
+                rgba(69, 201, 240, 0.16);
+        }
+
+        /* =========================================================
+           RIGHT FORM PANEL
+        ========================================================= */
+
+        .form-panel {
+            position: relative;
+
+            z-index: 1;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            padding: 40px 28px;
+        }
+
+        .card-stage {
+            width: 100%;
+
+            max-width: 400px;
+
+            perspective: 1200px;
+        }
+
+        .card {
+            background:
+                linear-gradient(
+                    160deg,
+                    rgba(255, 255, 255, 0.035),
+                    rgba(255, 255, 255, 0.01)
+                );
+
+            border:
+                1px solid var(--line-bright);
+
+            border-radius: 18px;
+
+            padding:
+                40px
+                34px
+                34px;
+
+            backdrop-filter: blur(16px);
+
+            box-shadow:
+                0 40px 90px rgba(0, 0, 0, 0.55);
+
+            transform-style: preserve-3d;
+
+            transition:
+                transform 0.25s ease-out;
+
+            opacity: 0;
+
+            animation:
+                rise 0.7s 0.1s ease forwards;
+        }
+
+        @keyframes rise {
+            from {
+                opacity: 0;
+
+                transform:
+                    translateY(18px);
+            }
+
+            to {
+                opacity: 1;
+
+                transform:
+                    translateY(0);
+            }
+        }
+
+        .card-top {
+            margin-bottom: 30px;
+
+            transform:
+                translateZ(24px);
+        }
+
+        .card-top h2 {
+            font-size: 23px;
+
+            font-weight: 600;
+
+            letter-spacing: -0.01em;
+        }
+
+        .card-top p {
+            margin-top: 8px;
+
+            color: var(--text-dim);
+
+            font-size: 14px;
+        }
+
+        /* =========================================================
+           FORM
+        ========================================================= */
+
+        form {
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 18px;
+
+            transform:
+                translateZ(20px);
+        }
+
+        .field {
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 8px;
+        }
+
+        .field label {
+            font-size: 12.5px;
+
+            color: var(--text-dim);
+
+            font-family: var(--mono);
+        }
+
+        .input-wrap {
+            position: relative;
+        }
+
+        .input-wrap > svg {
+            position: absolute;
+
+            left: 14px;
+            top: 50%;
+
+            transform:
+                translateY(-50%);
+
+            width: 16px;
+            height: 16px;
+
+            color: var(--text-mute);
+
+            pointer-events: none;
+        }
+
+        input {
+            width: 100%;
+
+            background:
+                rgba(255, 255, 255, 0.03);
+
+            border:
+                1px solid var(--line-bright);
+
+            border-radius: 10px;
+
+            padding:
+                13px
+                45px
+                13px
+                40px;
+
+            color: var(--text);
+
+            font-size: 14.5px;
+
+            font-family: var(--sans);
+
+            outline: none;
+
+            transition:
+                border-color 0.2s ease,
+                box-shadow 0.2s ease,
+                background 0.2s ease;
+        }
+
+        input::placeholder {
+            color: var(--text-mute);
+        }
+
+        input:focus {
+            border-color: var(--cyan);
+
+            background:
+                rgba(69, 201, 240, 0.05);
+
+            box-shadow:
+                0 0 0 3px
+                rgba(69, 201, 240, 0.15);
+        }
+
+        .toggle-visibility {
+            position: absolute;
+
+            right: 12px;
+            top: 50%;
+
+            transform:
+                translateY(-50%);
+
+            background: none;
+
+            border: none;
+
+            color: var(--text-mute);
+
+            cursor: pointer;
+
+            padding: 4px;
+
+            display: flex;
+
+            transition:
+                color 0.2s ease;
+        }
+
+        .toggle-visibility:hover {
+            color: var(--text);
+        }
+
+        .toggle-visibility svg {
+            width: 17px;
+            height: 17px;
+        }
+
+        .row-between {
+            display: flex;
+
+            align-items: center;
+
+            justify-content: space-between;
+
+            font-size: 13px;
+
+            margin-top: -2px;
+        }
+
+        .remember {
+            display: flex;
+
+            align-items: center;
+
+            gap: 8px;
+
+            color: var(--text-dim);
+
+            cursor: pointer;
+
+            user-select: none;
+        }
+
+        .remember input {
+            width: auto;
+
+            padding: 0;
+
+            accent-color: var(--cyan);
+        }
+
+        .row-between a {
+            color: var(--cyan);
+
+            text-decoration: none;
+        }
+
+        .row-between a:hover {
+            text-decoration: underline;
+        }
+
+        /* =========================================================
+           BUTTON
+        ========================================================= */
+
+        .cta3d {
+            position: relative;
+
+            display: block;
+
+            transform-style: preserve-3d;
+
+            margin-top: 6px;
+        }
+
+        .cta3d::after {
+            content: "";
+
+            position: absolute;
+
+            inset: 0;
+
+            border-radius: 10px;
+
+            background: #1a7fa3;
+
+            z-index: -1;
+        }
+
+        .submit-btn {
+            width: 100%;
+
+            text-align: center;
+
+            display: block;
+
+            font-weight: 600;
+
+            font-size: 15px;
+
+            color: #00131a;
+
+            background: var(--cyan);
+
+            padding:
+                14px
+                20px;
+
+            border-radius: 10px;
+
+            border: none;
+
+            cursor: pointer;
+
+            transform:
+                translateZ(8px);
+
+            transition:
+                transform 0.15s ease,
+                box-shadow 0.2s ease;
+        }
+
+        .cta3d:active .submit-btn {
+            transform:
+                translateZ(2px);
+        }
+
+        .submit-btn:hover {
+            box-shadow:
+                0 14px 34px
+                rgba(69, 201, 240, 0.28);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.65;
+
+            cursor: not-allowed;
+        }
+
+        /* =========================================================
+           DIVIDER / SSO
+        ========================================================= */
+
+        .divider {
+            display: flex;
+
+            align-items: center;
+
+            gap: 14px;
+
+            margin:
+                22px
+                0
+                18px;
+
+            color: var(--text-mute);
+
+            font-size: 12px;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: "";
+
+            flex: 1;
+
+            height: 1px;
+
+            background: var(--line);
+        }
+
+        .sso-row {
+            display: flex;
+
+            gap: 12px;
+        }
+
+        .sso-btn {
+            flex: 1;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            gap: 8px;
+
+            padding: 11px;
+
+            border-radius: 10px;
+
+            border:
+                1px solid var(--line-bright);
+
+            background:
+                rgba(255, 255, 255, 0.02);
+
+            color: var(--text-dim);
+
+            font-size: 13px;
+
+            text-decoration: none;
+
+            transition:
+                all 0.2s ease;
+        }
+
+        .sso-btn:hover {
+            border-color:
+                var(--line-bright);
+
+            background:
+                rgba(255, 255, 255, 0.05);
+
+            color: var(--text);
+        }
+
+        .sso-btn svg {
+            width: 15px;
+            height: 15px;
+        }
+
+        /* =========================================================
+           SIGNUP
+        ========================================================= */
+
+        .signup-note {
+            text-align: center;
+
+            margin-top: 26px;
+
+            font-size: 13.5px;
+
+            color: var(--text-dim);
+        }
+
+        .signup-note a {
+            color: var(--cyan);
+
+            text-decoration: none;
+        }
+
+        .signup-note a:hover {
+            text-decoration: underline;
+        }
+
+        /* =========================================================
+           MESSAGES
+        ========================================================= */
+
+        .error-msg {
+            display: flex;
+
+            align-items: center;
+
+            gap: 8px;
+
+            font-size: 13px;
+
+            color: var(--red);
+
+            background:
+                rgba(255, 106, 106, 0.10);
+
+            border:
+                1px solid rgba(255, 106, 106, 0.25);
+
+            padding:
+                10px
+                12px;
+
+            border-radius: 8px;
+
+            margin-bottom: 18px;
+        }
+
+        .error-msg svg {
+            width: 15px;
+            height: 15px;
+
+            flex-shrink: 0;
+        }
+
+        .success-msg {
+            display: flex;
+
+            align-items: center;
+
+            gap: 8px;
+
+            font-size: 13px;
+
+            color: var(--green);
+
+            background:
+                rgba(110, 231, 160, 0.08);
+
+            border:
+                1px solid rgba(110, 231, 160, 0.2);
+
+            padding:
+                10px
+                12px;
+
+            border-radius: 8px;
+
+            margin-bottom: 18px;
+        }
+
+        /* =========================================================
+           RESPONSIVE
+        ========================================================= */
+
+        @media (max-width: 900px) {
+
+            body {
+                grid-template-columns: 1fr;
+            }
+
+            .brand-panel {
+                display: none;
+            }
+
+            .form-panel {
+                min-height: 100vh;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+
+            * {
+                animation-duration: 0.01ms !important;
+
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="field"></div>
+    <div id="grid"></div>
+
+
+    <!-- =====================================================
+         LEFT BRAND PANEL
+    ====================================================== -->
+
+    <section
+        class="brand-panel"
+        id="brandPanel"
+    >
+
+        <div class="deco-orb"></div>
+
+
+        <div class="logo">
+
+            <span class="logo-mark">
+
+                <svg
+                    viewBox="0 0 26 26"
+                    fill="none"
+                >
+
+                    <path
+                        d="M13 2 L23 6.5 V13.5 C23 19 18.5 22.7 13 24.5 C7.5 22.7 3 19 3 13.5 V6.5 L13 2Z"
+                        stroke="#45c9f0"
+                        stroke-width="1.6"
+                    />
+
+                    <path
+                        d="M8.5 13 L11.5 16 L17.5 9.5"
+                        stroke="#45c9f0"
+                        stroke-width="1.6"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                    />
+
+                </svg>
+
+            </span>
+
+            Web<span>Sentinel</span>
+
+        </div>
+
+
+        <div class="brand-mid">
+
+            <div class="badge">
+
+                <span class="dot"></span>
+
+                Automated Web Security Assessment
+
+            </div>
+
+
+            <h1>
+                Get back to your
+                <em>latest findings.</em>
+            </h1>
+
+
+            <p>
+                Log in to review scan results, triage vulnerabilities,
+                and manage your authorized security assessments.
+            </p>
+
+
+            <div class="mini-terminal">
+
+                <div class="mt-head">
+
+                    <div
+                        class="mt-dot"
+                        style="background:#ff6a6a"
+                    ></div>
+
+                    <div
+                        class="mt-dot"
+                        style="background:#ffb454"
+                    ></div>
+
+                    <div
+                        class="mt-dot"
+                        style="background:#6ee7a0"
+                    ></div>
+
+                </div>
+
+
+                <div class="mt-body">
+
+                    <span class="cyan">›</span>
+                    websentinel authentication
+                    <br>
+
+                    <span class="ok">ready</span>
+                    secure session initialization
+                    <br>
+
+                    <span class="warn">status</span>
+                    waiting for credentials
+                    <br>
+
+                    <span style="color:#5b6478;">
+                        authenticating
+                    </span>
+
+                    <span class="caret"></span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="brand-foot">
+
+            <div>
+
+                <b>Web</b>
+
+                Security
+
+            </div>
+
+
+            <div>
+
+                <b>ZAP</b>
+
+                Powered
+
+            </div>
+
+
+            <div>
+
+                <b>Local</b>
+
+                Assessment
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         LOGIN PANEL
+    ====================================================== -->
+
+    <section class="form-panel">
+
+        <div
+            class="card-stage"
+            id="cardStage"
+        >
+
+            <div
+                class="card"
+                id="card"
+            >
+
+                <div class="card-top">
+
+                    <h2>
+                        Log in to WebSentinel
+                    </h2>
+
+                    <p>
+                        Enter your credentials to access your scan dashboard.
+                    </p>
+
+                </div>
+
+
+                <!-- ERROR -->
+
+                {% if error %}
+
+                    <div class="error-msg">
+
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                        >
+
+                            <circle
+                                cx="12"
+                                cy="12"
+                                r="10"
+                            />
+
+                            <path
+                                d="M12 8v5M12 16h.01"
+                            />
+
+                        </svg>
+
+                        <span>
+                            {{ error }}
+                        </span>
+
+                    </div>
+
+                {% endif %}
+
+
+                <!-- SUCCESS -->
+
+                {% if success %}
+
+                    <div class="success-msg">
+
+                        <span>✓</span>
+
+                        <span>
+                            {{ success }}
+                        </span>
+
+                    </div>
+
+                {% endif %}
+
+
+                <!-- LOGIN FORM -->
+
+                <form
+                    id="loginForm"
+                    method="POST"
+                    action="{{ url_for('login') }}"
+                >
+
+                    <!-- EMAIL -->
+
+                    <div class="field">
+
+                        <label for="email">
+                            Email
+                        </label>
+
+
+                        <div class="input-wrap">
+
+                            <svg
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="1.8"
+                            >
+
+                                <rect
+                                    x="3"
+                                    y="5"
+                                    width="18"
+                                    height="14"
+                                    rx="2"
+                                />
+
+                                <path
+                                    d="M3 7l9 6 9-6"
+                                />
+
+                            </svg>
+
+
+                            <input
+                                id="email"
+                                name="email"
+                                type="email"
+                                placeholder="you@company.com"
+                                autocomplete="email"
+                                value="{{ request.form.get('email', '') }}"
+                                required
+                            >
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- PASSWORD -->
+
+                    <div class="field">
+
+                        <label for="password">
+                            Password
+                        </label>
+
+
+                        <div class="input-wrap">
+
+                            <svg
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="1.8"
+                            >
+
+                                <rect
+                                    x="4"
+                                    y="10"
+                                    width="16"
+                                    height="10"
+                                    rx="2"
+                                />
+
+                                <path
+                                    d="M8 10V7a4 4 0 018 0v3"
+                                />
+
+                            </svg>
+
+
+                            <input
+                                id="password"
+                                name="password"
+                                type="password"
+                                placeholder="Enter your password"
+                                autocomplete="current-password"
+                                minlength="8"
+                                required
+                            >
+
+
+                            <button
+                                type="button"
+                                class="toggle-visibility"
+                                id="toggleVis"
+                                aria-label="Show password"
+                            >
+
+                                <svg
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="1.8"
+                                >
+
+                                    <path
+                                        d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"
+                                    />
+
+                                    <circle
+                                        cx="12"
+                                        cy="12"
+                                        r="3"
+                                    />
+
+                                </svg>
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- OPTIONS -->
+
+                    <div class="row-between">
+
+                        <label class="remember">
+
+                            <input
+                                type="checkbox"
+                                name="remember"
+                            >
+
+                            Remember me
+
+                        </label>
+
+
+                        <a
+                            href="#"
+                            onclick="return false;"
+                        >
+                            Forgot password?
+                        </a>
+
+                    </div>
+
+
+                    <!-- LOGIN BUTTON -->
+
+                    <span class="cta3d">
+
+                        <button
+                            type="submit"
+                            class="submit-btn"
+                            id="submitBtn"
+                        >
+                            Log in
+                        </button>
+
+                    </span>
+
+                </form>
+
+
+                <!-- SSO -->
+
+                <div class="divider">
+                    or continue with
+                </div>
+
+
+                <div class="sso-row">
+
+                    <a
+                        href="#"
+                        class="sso-btn"
+                        onclick="return false;"
+                    >
+
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                        >
+
+                            <path
+                                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"
+                            />
+
+                            <path
+                                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.99.66-2.25 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.85A11 11 0 0012 23z"
+                            />
+
+                            <path
+                                d="M5.84 14.1a6.6 6.6 0 010-4.2V7.05H2.18a11 11 0 000 9.9l3.66-2.85C6.71 7.3 9.14 5.38 12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.05z"
+                            />
+
+                        </svg>
+
+                        Google
+
+                    </a>
+
+
+                    <a
+                        href="#"
+                        class="sso-btn"
+                        onclick="return false;"
+                    >
+
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                        >
+
+                            <path
+                                d="M12 1C5.9 1 1 5.9 1 12c0 4.9 3.2 9.1 7.6 10.6.6.1.8-.2.8-.6v-2.2c-3.1.7-3.8-1.5-3.8-1.5-.5-1.3-1.2-1.6-1.2-1.6-1-.7.1-.7.1-.7 1.1.1 1.7 1.1 1.7 1.1 1 1.7 2.6 1.2 3.2.9.1-.7.4-1.2.7-1.5-2.5-.3-5.1-1.2-5.1-5.5 0-1.2.4-2.2 1.1-3-.1-.3-.5-1.5.1-3.1 0 0 .9-.3 3 1.1a10.4 10.4 0 015.4 0c2.1-1.4 3-1.1 3-1.1.6 1.6.2 2.8.1 3.1.7.8 1.1 1.8 1.1 3 0 4.3-2.6 5.2-5.1 5.5.4.4.8 1.1.8 2.2v3.3c0 .4.2.7.8.6C19.8 21.1 23 16.9 23 12c0-6.1-4.9-11-11-11z"
+                            />
+
+                        </svg>
+
+                        GitHub
+
+                    </a>
+
+                </div>
+
+
+                <!-- SIGNUP -->
+
+                <p class="signup-note">
+
+                    Don't have an account?
+
+                    <a href="{{ url_for('signup') }}">
+                        Create an account
+                    </a>
+
+                </p>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <script>
+
+        /*
+         * =====================================================
+         * 3D LOGIN CARD
+         * =====================================================
+         */
+
+        const stage =
+            document.getElementById("cardStage");
+
+        const card =
+            document.getElementById("card");
+
+
+        if (stage && card) {
+
+            stage.addEventListener(
+                "mousemove",
+                (event) => {
+
+                    const rect =
+                        card.getBoundingClientRect();
+
+                    const px =
+                        (event.clientX - rect.left)
+                        / rect.width
+                        - 0.5;
+
+                    const py =
+                        (event.clientY - rect.top)
+                        / rect.height
+                        - 0.5;
+
+
+                    card.style.transform =
+                        `perspective(1200px)
+                         rotateY(${px * 6}deg)
+                         rotateX(${-py * 6}deg)`;
+                }
+            );
+
+
+            stage.addEventListener(
+                "mouseleave",
+                () => {
+
+                    card.style.transform =
+                        "perspective(1200px) rotateY(0deg) rotateX(0deg)";
+                }
+            );
+
+        }
+
+
+        /*
+         * =====================================================
+         * BRAND PANEL PARALLAX
+         * =====================================================
+         */
+
+        const brandPanel =
+            document.getElementById(
+                "brandPanel"
+            );
+
+        const miniTerminal =
+            document.querySelector(
+                ".mini-terminal"
+            );
+
+
+        if (
+            brandPanel &&
+            miniTerminal
+        ) {
+
+            brandPanel.addEventListener(
+                "mousemove",
+                (event) => {
+
+                    const rect =
+                        brandPanel.getBoundingClientRect();
+
+                    const px =
+                        (event.clientX - rect.left)
+                        / rect.width
+                        - 0.5;
+
+                    const py =
+                        (event.clientY - rect.top)
+                        / rect.height
+                        - 0.5;
+
+
+                    miniTerminal.style.transform =
+                        `perspective(1000px)
+                         rotateY(${4 - px * 8}deg)
+                         rotateX(${2 - py * 6}deg)`;
+                }
+            );
+
+        }
+
+
+        /*
+         * =====================================================
+         * PASSWORD VISIBILITY
+         * =====================================================
+         */
+
+        const passwordInput =
+            document.getElementById(
+                "password"
+            );
+
+        const toggleButton =
+            document.getElementById(
+                "toggleVis"
+            );
+
+
+        if (
+            passwordInput &&
+            toggleButton
+        ) {
+
+            toggleButton.addEventListener(
+                "click",
+                () => {
+
+                    const isPassword =
+                        passwordInput.type === "password";
+
+
+                    passwordInput.type =
+                        isPassword
+                            ? "text"
+                            : "password";
+
+
+                    toggleButton.setAttribute(
+                        "aria-label",
+                        isPassword
+                            ? "Hide password"
+                            : "Show password"
+                    );
+
+                }
+            );
+
+        }
+
+
+        /*
+         * =====================================================
+         * LOGIN SUBMIT STATE
+         * =====================================================
+         *
+         * Do not prevent the form submission.
+         * Flask must receive the POST request.
+         */
+
+        const loginForm =
+            document.getElementById(
+                "loginForm"
+            );
+
+        const submitButton =
+            document.getElementById(
+                "submitBtn"
+            );
+
+
+        if (
+            loginForm &&
+            submitButton
+        ) {
+
+            loginForm.addEventListener(
+                "submit",
+                () => {
+
+                    submitButton.disabled =
+                        true;
+
+                    submitButton.textContent =
+                        "Authenticating…";
+
+                }
+            );
+
+        }
+
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Scan in Progress — WebSentinel</title>
+
+    <link
+        rel="preconnect"
+        href="https://fonts.googleapis.com"
+    >
+
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin
+    >
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet"
+    >
+
+    <style>
+        :root {
+            --bg: #070b12;
+            --panel: #0d131d;
+            --panel-2: #101824;
+            --border: rgba(120, 150, 180, 0.16);
+
+            --text: #edf6ff;
+            --muted: #8292a7;
+
+            --cyan: #55e6ff;
+            --violet: #8c7bff;
+            --green: #5cf2a5;
+            --yellow: #ffd166;
+            --red: #ff5c7a;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            min-height: 100vh;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            padding: 24px;
+
+            color: var(--text);
+
+            font-family: "IBM Plex Sans", sans-serif;
+
+            background:
+                radial-gradient(
+                    circle at top right,
+                    rgba(85, 230, 255, 0.08),
+                    transparent 35%
+                ),
+                radial-gradient(
+                    circle at bottom left,
+                    rgba(140, 123, 255, 0.08),
+                    transparent 35%
+                ),
+                var(--bg);
+        }
+
+        body::before {
+            content: "";
+
+            position: fixed;
+            inset: 0;
+
+            pointer-events: none;
+
+            opacity: 0.22;
+
+            background-image:
+                linear-gradient(
+                    rgba(255, 255, 255, 0.025) 1px,
+                    transparent 1px
+                ),
+                linear-gradient(
+                    90deg,
+                    rgba(255, 255, 255, 0.025) 1px,
+                    transparent 1px
+                );
+
+            background-size: 48px 48px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 760px;
+
+            position: relative;
+            z-index: 1;
+        }
+
+        .brand {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .brand-mark {
+            width: 48px;
+            height: 48px;
+
+            margin: 0 auto 12px;
+
+            display: grid;
+            place-items: center;
+
+            border-radius: 14px;
+
+            color: #061017;
+
+            font-weight: 700;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    var(--cyan),
+                    var(--violet)
+                );
+
+            box-shadow:
+                0 0 35px rgba(85, 230, 255, 0.18);
+        }
+
+        .brand-name {
+            font-size: 21px;
+            font-weight: 700;
+        }
+
+        .brand-subtitle {
+            margin-top: 5px;
+
+            color: var(--muted);
+
+            font-size: 12px;
+        }
+
+        .card {
+            padding: 32px;
+
+            border:
+                1px solid var(--border);
+
+            border-radius: 22px;
+
+            background:
+                linear-gradient(
+                    180deg,
+                    rgba(13, 19, 29, 0.96),
+                    rgba(9, 14, 22, 0.96)
+                );
+
+            box-shadow:
+                0 30px 80px rgba(0, 0, 0, 0.45);
+        }
+
+        .status-header {
+            text-align: center;
+        }
+
+        .status-icon {
+            width: 70px;
+            height: 70px;
+
+            display: grid;
+            place-items: center;
+
+            margin: 0 auto 18px;
+
+            border-radius: 50%;
+
+            color: var(--cyan);
+
+            border:
+                1px solid rgba(85, 230, 255, 0.16);
+
+            background:
+                rgba(85, 230, 255, 0.06);
+
+            font-size: 26px;
+
+            animation: pulse 1.8s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow:
+                    0 0 0 0
+                    rgba(85, 230, 255, 0.25);
+            }
+
+            70% {
+                box-shadow:
+                    0 0 0 16px
+                    rgba(85, 230, 255, 0);
+            }
+
+            100% {
+                box-shadow:
+                    0 0 0 0
+                    rgba(85, 230, 255, 0);
+            }
+        }
+
+        .status-title {
+            font-size: 25px;
+
+            font-weight: 700;
+
+            letter-spacing: -0.03em;
+        }
+
+        .status-description {
+            max-width: 510px;
+
+            margin: 8px auto 0;
+
+            color: var(--muted);
+
+            font-size: 13px;
+
+            line-height: 1.7;
+        }
+
+        .target-box {
+            margin-top: 28px;
+
+            padding: 15px 16px;
+
+            border:
+                1px solid var(--border);
+
+            border-radius: 13px;
+
+            background:
+                rgba(255, 255, 255, 0.018);
+        }
+
+        .target-label {
+            color: #607086;
+
+            font-family: "IBM Plex Mono", monospace;
+
+            font-size: 10px;
+
+            text-transform: uppercase;
+
+            letter-spacing: 0.12em;
+        }
+
+        .target {
+            margin-top: 8px;
+
+            overflow: hidden;
+
+            color: var(--cyan);
+
+            font-family: "IBM Plex Mono", monospace;
+
+            font-size: 13px;
+
+            white-space: nowrap;
+
+            text-overflow: ellipsis;
+        }
+
+        .progress-section {
+            margin-top: 30px;
+        }
+
+        .progress-header {
+            display: flex;
+
+            justify-content: space-between;
+
+            margin-bottom: 10px;
+        }
+
+        .progress-stage {
+            color: #aebdce;
+
+            font-size: 13px;
+        }
+
+        .progress-percent {
+            color: var(--cyan);
+
+            font-family: "IBM Plex Mono", monospace;
+
+            font-size: 12px;
+        }
+
+        .progress-track {
+            width: 100%;
+            height: 10px;
+
+            overflow: hidden;
+
+            border-radius: 999px;
+
+            background:
+                rgba(255, 255, 255, 0.05);
+        }
+
+        .progress-bar {
+            width: 0%;
+            height: 100%;
+
+            border-radius: inherit;
+
+            background:
+                linear-gradient(
+                    90deg,
+                    var(--cyan),
+                    var(--violet)
+                );
+
+            box-shadow:
+                0 0 20px
+                rgba(85, 230, 255, 0.25);
+
+            transition: width 0.5s ease;
+        }
+
+        .details {
+            display: grid;
+
+            grid-template-columns:
+                repeat(2, minmax(0, 1fr));
+
+            gap: 12px;
+
+            margin-top: 25px;
+        }
+
+        .detail {
+            padding: 14px;
+
+            border:
+                1px solid var(--border);
+
+            border-radius: 12px;
+
+            background:
+                rgba(255, 255, 255, 0.018);
+        }
+
+        .detail-label {
+            color: #617087;
+
+            font-family: "IBM Plex Mono", monospace;
+
+            font-size: 9px;
+
+            text-transform: uppercase;
+
+            letter-spacing: 0.1em;
+        }
+
+        .detail-value {
+            margin-top: 7px;
+
+            color: #d9e7f5;
+
+            font-size: 12px;
+        }
+
+        .actions {
+            display: flex;
+
+            justify-content: center;
+
+            margin-top: 28px;
+        }
+
+        .button {
+            padding: 12px 18px;
+
+            border: 1px solid
+                rgba(85, 230, 255, 0.18);
+
+            border-radius: 10px;
+
+            color: var(--cyan);
+
+            background:
+                rgba(85, 230, 255, 0.05);
+
+            font-size: 12px;
+
+            text-decoration: none;
+
+            cursor: pointer;
+
+            transition:
+                background 0.2s ease,
+                border 0.2s ease,
+                color 0.2s ease;
+        }
+
+        .button:hover {
+            color: var(--text);
+
+            border-color:
+                rgba(85, 230, 255, 0.35);
+
+            background:
+                rgba(85, 230, 255, 0.09);
+        }
+
+        .button.hidden {
+            display: none;
+        }
+
+        .error-box {
+            display: none;
+
+            margin-top: 20px;
+
+            padding: 14px;
+
+            border:
+                1px solid
+                rgba(255, 92, 122, 0.18);
+
+            border-radius: 10px;
+
+            color: var(--red);
+
+            background:
+                rgba(255, 92, 122, 0.05);
+
+            font-size: 12px;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 14px;
+            }
+
+            .card {
+                padding: 22px;
+            }
+
+            .details {
+                grid-template-columns: 1fr;
+            }
+
+            .status-title {
+                font-size: 22px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="brand">
+
+        <div class="brand-mark">
+            WS
+        </div>
+
+        <div class="brand-name">
+            WebSentinel
+        </div>
+
+        <div class="brand-subtitle">
+            Automated Web Security Assessment
+        </div>
+
+    </div>
+
+
+    <div class="card">
+
+        <div class="status-header">
+
+            <div
+                class="status-icon"
+                id="statusIcon"
+            >
+                ◌
+            </div>
+
+            <h1
+                class="status-title"
+                id="statusTitle"
+            >
+                Scan Starting
+            </h1>
+
+            <p
+                class="status-description"
+                id="statusDescription"
+            >
+                WebSentinel is preparing the security assessment.
+                You can keep this page open while the scan runs.
+            </p>
+
+        </div>
+
+
+        <div class="target-box">
+
+            <div class="target-label">
+                Target
+            </div>
+
+            <div class="target">
+                {{ scan.target }}
+            </div>
+
+        </div>
+
+
+        <div class="progress-section">
+
+            <div class="progress-header">
+
+                <div
+                    class="progress-stage"
+                    id="progressStage"
+                >
+                    {{ scan.stage }}
+                </div>
+
+                <div
+                    class="progress-percent"
+                    id="progressPercent"
+                >
+                    {{ scan.progress }}%
+                </div>
+
+            </div>
+
+
+            <div class="progress-track">
+
+                <div
+                    class="progress-bar"
+                    id="progressBar"
+                    style="width: {{ scan.progress }}%;"
+                ></div>
+
+            </div>
+
+        </div>
+
+
+        <div class="details">
+
+            <div class="detail">
+
+                <div class="detail-label">
+                    Scan ID
+                </div>
+
+                <div class="detail-value">
+                    {{ scan.id }}
+                </div>
+
+            </div>
+
+
+            <div class="detail">
+
+                <div class="detail-label">
+                    Scanner
+                </div>
+
+                <div class="detail-value">
+                    OWASP ZAP
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div
+            class="error-box"
+            id="errorBox"
+        >
+            <strong>Scan failed:</strong>
+            <span id="errorMessage"></span>
+        </div>
+
+
+        <div class="actions">
+
+            <a
+                href="{{ url_for('results', scan_id=scan.id) }}"
+                class="button hidden"
+                id="resultsButton"
+            >
+    View Results
+</a>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    const scanId = "{{ scan.id }}";
+
+    const progressBar =
+        document.getElementById("progressBar");
+
+    const progressPercent =
+        document.getElementById("progressPercent");
+
+    const progressStage =
+        document.getElementById("progressStage");
+
+    const statusTitle =
+        document.getElementById("statusTitle");
+
+    const statusDescription =
+        document.getElementById("statusDescription");
+
+    const statusIcon =
+        document.getElementById("statusIcon");
+
+    const resultsButton =
+        document.getElementById("resultsButton");
+
+    const errorBox =
+        document.getElementById("errorBox");
+
+    const errorMessage =
+        document.getElementById("errorMessage");
+
+
+    let pollingActive = true;
+
+
+    function updateScanUI(scan) {
+
+        const progress =
+            Number(scan.progress || 0);
+
+
+        progressBar.style.width =
+            progress + "%";
+
+
+        progressPercent.textContent =
+            progress + "%";
+
+
+        progressStage.textContent =
+            scan.stage || "Processing";
+
+
+        if (scan.status === "QUEUED") {
+
+            statusTitle.textContent =
+                "Scan Queued";
+
+            statusDescription.textContent =
+                "Your security assessment is waiting to start.";
+
+            statusIcon.textContent =
+                "…";
+        }
+
+
+        else if (scan.status === "STARTING") {
+
+            statusTitle.textContent =
+                "Starting Scan";
+
+            statusDescription.textContent =
+                "WebSentinel is starting the scanning engine.";
+
+            statusIcon.textContent =
+                "◌";
+        }
+
+
+        else if (scan.status === "RUNNING") {
+
+            statusTitle.textContent =
+                "Scan in Progress";
+
+            statusDescription.textContent =
+                "OWASP ZAP is actively assessing the target.";
+
+            statusIcon.textContent =
+                "↻";
+        }
+
+
+        else if (scan.status === "COLLECTING") {
+
+            statusTitle.textContent =
+                "Collecting Results";
+
+            statusDescription.textContent =
+                "The scan is complete and WebSentinel is collecting the generated reports.";
+
+            statusIcon.textContent =
+                "◫";
+        }
+
+
+        else if (scan.status === "COMPLETE") {
+
+            statusTitle.textContent =
+                "Scan Complete";
+
+            statusDescription.textContent =
+                "The security assessment has finished successfully.";
+
+            statusIcon.textContent =
+                "✓";
+
+
+            progressBar.style.width =
+                "100%";
+
+            progressPercent.textContent =
+                "100%";
+
+
+            resultsButton.classList.remove("hidden");
+
+            pollingActive = false;
+        }
+
+
+        else if (scan.status === "FAILED") {
+
+            statusTitle.textContent =
+                "Scan Failed";
+
+            statusDescription.textContent =
+                "WebSentinel was unable to complete the security assessment.";
+
+            statusIcon.textContent =
+                "×";
+
+
+            errorBox.style.display =
+                "block";
+
+
+            errorMessage.textContent =
+                scan.error || "Unknown error";
+
+
+            pollingActive = false;
+        }
+    }
+
+
+    async function pollScan() {
+
+        if (!pollingActive) {
+            return;
+        }
+
+
+        try {
+
+            const response =
+                await fetch(
+                    "/api/scan/" + scanId,
+                    {
+                        headers: {
+                            "Accept":
+                                "application/json"
+                        }
+                    }
+                );
+
+
+            if (!response.ok) {
+                throw new Error(
+                    "Unable to retrieve scan status."
+                );
+            }
+
+
+            const scan =
+                await response.json();
+
+
+            updateScanUI(scan);
+
+
+            if (pollingActive) {
+
+                setTimeout(
+                    pollScan,
+                    1500
+                );
+            }
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "Scan polling error:",
+                error
+            );
+
+
+            if (pollingActive) {
+
+                setTimeout(
+                    pollScan,
+                    3000
+                );
+            }
+        }
+    }
+
+
+    updateScanUI({
+        status: "{{ scan.status }}",
+        progress: {{ scan.progress }},
+        stage: "{{ scan.stage }}"
+    });
+
+
+    pollScan();
+
+</script>
+
+</body>
+</html>
